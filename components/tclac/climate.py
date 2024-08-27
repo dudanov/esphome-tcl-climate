@@ -1,27 +1,25 @@
-﻿from esphome import automation, pins
 import esphome.codegen as cg
 import esphome.config_validation as cv
+from esphome import automation, pins
 from esphome.components import climate, uart
-from esphome.const import (
-    CONF_ID,
-    CONF_LEVEL,
-    CONF_BEEPER,
-    CONF_VISUAL,
-    CONF_MAX_TEMPERATURE,
-    CONF_MIN_TEMPERATURE,
-    CONF_SUPPORTED_MODES,
-    CONF_TEMPERATURE_STEP,
-    CONF_SUPPORTED_PRESETS,
-    CONF_TARGET_TEMPERATURE,
-    CONF_SUPPORTED_FAN_MODES,
-    CONF_SUPPORTED_SWING_MODES,
-)
-
 from esphome.components.climate import (
+    CONF_CURRENT_TEMPERATURE,
     ClimateMode,
     ClimatePreset,
     ClimateSwingMode,
-    CONF_CURRENT_TEMPERATURE,
+)
+from esphome.const import (
+    CONF_BEEPER,
+    CONF_ID,
+    CONF_MAX_TEMPERATURE,
+    CONF_MIN_TEMPERATURE,
+    CONF_SUPPORTED_FAN_MODES,
+    CONF_SUPPORTED_MODES,
+    CONF_SUPPORTED_PRESETS,
+    CONF_SUPPORTED_SWING_MODES,
+    CONF_TARGET_TEMPERATURE,
+    CONF_TEMPERATURE_STEP,
+    CONF_VISUAL,
 )
 
 AUTO_LOAD = ["climate"]
@@ -44,7 +42,9 @@ CONF_VERTICAL_SWING_MODE = "vertical_swing_mode"
 CONF_HORIZONTAL_SWING_MODE = "horizontal_swing_mode"
 
 tclac_ns = cg.esphome_ns.namespace("tclac")
-tclacClimate = tclac_ns.class_("tclacClimate", uart.UARTDevice, climate.Climate, cg.PollingComponent)
+tclacClimate = tclac_ns.class_(
+    "tclacClimate", uart.UARTDevice, climate.Climate, cg.PollingComponent
+)
 
 SUPPORTED_FAN_MODES_OPTIONS = {
     "AUTO": ClimateMode.CLIMATE_FAN_AUTO,  # Доступен всегда
@@ -74,7 +74,7 @@ SUPPORTED_CLIMATE_MODES_OPTIONS = {
 }
 
 SUPPORTED_CLIMATE_PRESETS_OPTIONS = {
-    "NONE": ClimatePreset.CLIMATE_PRESET_NONE, # Доступен всегда
+    "NONE": ClimatePreset.CLIMATE_PRESET_NONE,  # Доступен всегда
     "ECO": ClimatePreset.CLIMATE_PRESET_ECO,
     "SLEEP": ClimatePreset.CLIMATE_PRESET_SLEEP,
     "COMFORT": ClimatePreset.CLIMATE_PRESET_COMFORT,
@@ -115,6 +115,7 @@ AIRFLOW_HORIZONTAL_DIRECTION_OPTIONS = {
     "MAX_RIGHT": AirflowHorizontalDirection.MAX_RIGHT,
 }
 
+
 # Проверка конфигурации интерфейса и принятие значений по умолчанию
 def validate_visual(config):
     if CONF_VISUAL in config:
@@ -122,24 +123,43 @@ def validate_visual(config):
         if CONF_MIN_TEMPERATURE in visual_config:
             min_temp = visual_config[CONF_MIN_TEMPERATURE]
             if min_temp < TCLAC_MIN_TEMPERATURE:
-                raise cv.Invalid(f"Указанная интерфейсная минимальная температура в {min_temp} ниже допустимой {TCLAC_MIN_TEMPERATURE} для кондиционера")
+                raise cv.Invalid(
+                    f"Указанная интерфейсная минимальная температура в {min_temp} ниже допустимой {TCLAC_MIN_TEMPERATURE} для кондиционера"
+                )
         else:
             config[CONF_VISUAL][CONF_MIN_TEMPERATURE] = TCLAC_MIN_TEMPERATURE
         if CONF_MAX_TEMPERATURE in visual_config:
             max_temp = visual_config[CONF_MAX_TEMPERATURE]
             if max_temp > TCLAC_MAX_TEMPERATURE:
-                raise cv.Invalid(f"Указанная интерфейсная максимальная температура в {max_temp} выше допустимой {TCLAC_MAX_TEMPERATURE} для кондиционера")
+                raise cv.Invalid(
+                    f"Указанная интерфейсная максимальная температура в {max_temp} выше допустимой {TCLAC_MAX_TEMPERATURE} для кондиционера"
+                )
         else:
             config[CONF_VISUAL][CONF_MAX_TEMPERATURE] = TCLAC_MAX_TEMPERATURE
         if CONF_TEMPERATURE_STEP in visual_config:
-            temp_step = config[CONF_VISUAL][CONF_TEMPERATURE_STEP][CONF_TARGET_TEMPERATURE]
+            temp_step = config[CONF_VISUAL][CONF_TEMPERATURE_STEP][
+                CONF_TARGET_TEMPERATURE
+            ]
             if ((int)(temp_step * 2)) / 2 != temp_step:
-                raise cv.Invalid(f"Указанный шаг температуры {temp_step} не корректен, должен быть кратен 1")
+                raise cv.Invalid(
+                    f"Указанный шаг температуры {temp_step} не корректен, должен быть кратен 1"
+                )
         else:
-            config[CONF_VISUAL][CONF_TEMPERATURE_STEP] = {CONF_TARGET_TEMPERATURE: TCLAC_TARGET_TEMPERATURE_STEP,CONF_CURRENT_TEMPERATURE: TCLAC_CURRENT_TEMPERATURE_STEP,}
+            config[CONF_VISUAL][CONF_TEMPERATURE_STEP] = {
+                CONF_TARGET_TEMPERATURE: TCLAC_TARGET_TEMPERATURE_STEP,
+                CONF_CURRENT_TEMPERATURE: TCLAC_CURRENT_TEMPERATURE_STEP,
+            }
     else:
-        config[CONF_VISUAL] = {CONF_MIN_TEMPERATURE: TCLAC_MIN_TEMPERATURE,CONF_MAX_TEMPERATURE: TCLAC_MAX_TEMPERATURE,CONF_TEMPERATURE_STEP: {CONF_TARGET_TEMPERATURE: TCLAC_TARGET_TEMPERATURE_STEP,CONF_CURRENT_TEMPERATURE: TCLAC_CURRENT_TEMPERATURE_STEP,},}
+        config[CONF_VISUAL] = {
+            CONF_MIN_TEMPERATURE: TCLAC_MIN_TEMPERATURE,
+            CONF_MAX_TEMPERATURE: TCLAC_MAX_TEMPERATURE,
+            CONF_TEMPERATURE_STEP: {
+                CONF_TARGET_TEMPERATURE: TCLAC_TARGET_TEMPERATURE_STEP,
+                CONF_CURRENT_TEMPERATURE: TCLAC_CURRENT_TEMPERATURE_STEP,
+            },
+        }
     return config
+
 
 # Проверка конфигурации компонента и принятие значений по умолчанию
 CONFIG_SCHEMA = cv.All(
@@ -152,14 +172,60 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_TX_LED): pins.gpio_output_pin_schema,
             cv.Optional(CONF_FORCE_MODE, default=True): cv.boolean,
             cv.Optional(CONF_MODULE_DISPLAY, default=True): cv.boolean,
-            cv.Optional(CONF_VERTICAL_AIRFLOW, default="CENTER"): cv.ensure_list(cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)),
-            cv.Optional(CONF_VERTICAL_SWING_MODE, default="UP_DOWN"): cv.ensure_list(cv.enum(VERTICAL_SWING_DIRECTION_OPTIONS, upper=True)),
-            cv.Optional(CONF_HORIZONTAL_AIRFLOW, default="CENTER"): cv.ensure_list(cv.enum(AIRFLOW_HORIZONTAL_DIRECTION_OPTIONS, upper=True)),
-            cv.Optional(CONF_HORIZONTAL_SWING_MODE, default="LEFT_RIGHT"): cv.ensure_list(cv.enum(HORIZONTAL_SWING_DIRECTION_OPTIONS, upper=True)),
-            cv.Optional(CONF_SUPPORTED_PRESETS,default=["NONE","ECO","SLEEP","COMFORT",],): cv.ensure_list(cv.enum(SUPPORTED_CLIMATE_PRESETS_OPTIONS, upper=True)),
-            cv.Optional(CONF_SUPPORTED_SWING_MODES,default=["OFF","VERTICAL","HORIZONTAL","BOTH",],): cv.ensure_list(cv.enum(SUPPORTED_SWING_MODES_OPTIONS, upper=True)),
-            cv.Optional(CONF_SUPPORTED_MODES,default=["OFF","AUTO","COOL","HEAT","DRY","FAN_ONLY",],): cv.ensure_list(cv.enum(SUPPORTED_CLIMATE_MODES_OPTIONS, upper=True)),
-            cv.Optional(CONF_SUPPORTED_FAN_MODES,default=["AUTO","QUIET","LOW","MIDDLE","MEDIUM","HIGH","FOCUS","DIFFUSE",],): cv.ensure_list(cv.enum(SUPPORTED_FAN_MODES_OPTIONS, upper=True)),
+            cv.Optional(CONF_VERTICAL_AIRFLOW, default="CENTER"): cv.ensure_list(
+                cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)
+            ),
+            cv.Optional(CONF_VERTICAL_SWING_MODE, default="UP_DOWN"): cv.ensure_list(
+                cv.enum(VERTICAL_SWING_DIRECTION_OPTIONS, upper=True)
+            ),
+            cv.Optional(CONF_HORIZONTAL_AIRFLOW, default="CENTER"): cv.ensure_list(
+                cv.enum(AIRFLOW_HORIZONTAL_DIRECTION_OPTIONS, upper=True)
+            ),
+            cv.Optional(
+                CONF_HORIZONTAL_SWING_MODE, default="LEFT_RIGHT"
+            ): cv.ensure_list(cv.enum(HORIZONTAL_SWING_DIRECTION_OPTIONS, upper=True)),
+            cv.Optional(
+                CONF_SUPPORTED_PRESETS,
+                default=[
+                    "NONE",
+                    "ECO",
+                    "SLEEP",
+                    "COMFORT",
+                ],
+            ): cv.ensure_list(cv.enum(SUPPORTED_CLIMATE_PRESETS_OPTIONS, upper=True)),
+            cv.Optional(
+                CONF_SUPPORTED_SWING_MODES,
+                default=[
+                    "OFF",
+                    "VERTICAL",
+                    "HORIZONTAL",
+                    "BOTH",
+                ],
+            ): cv.ensure_list(cv.enum(SUPPORTED_SWING_MODES_OPTIONS, upper=True)),
+            cv.Optional(
+                CONF_SUPPORTED_MODES,
+                default=[
+                    "OFF",
+                    "AUTO",
+                    "COOL",
+                    "HEAT",
+                    "DRY",
+                    "FAN_ONLY",
+                ],
+            ): cv.ensure_list(cv.enum(SUPPORTED_CLIMATE_MODES_OPTIONS, upper=True)),
+            cv.Optional(
+                CONF_SUPPORTED_FAN_MODES,
+                default=[
+                    "AUTO",
+                    "QUIET",
+                    "LOW",
+                    "MIDDLE",
+                    "MEDIUM",
+                    "HIGH",
+                    "FOCUS",
+                    "DIFFUSE",
+                ],
+            ): cv.ensure_list(cv.enum(SUPPORTED_FAN_MODES_OPTIONS, upper=True)),
         }
     )
     .extend(uart.UART_DEVICE_SCHEMA)
@@ -177,34 +243,37 @@ ModuleDisplayOnAction = tclac_ns.class_("ModuleDisplayOnAction", automation.Acti
 VerticalAirflowAction = tclac_ns.class_("VerticalAirflowAction", automation.Action)
 ModuleDisplayOffAction = tclac_ns.class_("ModuleDisplayOffAction", automation.Action)
 HorizontalAirflowAction = tclac_ns.class_("HorizontalAirflowAction", automation.Action)
-VerticalSwingDirectionAction = tclac_ns.class_("VerticalSwingDirectionAction", automation.Action)
-HorizontalSwingDirectionAction = tclac_ns.class_("HorizontalSwingDirectionAction", automation.Action)
+VerticalSwingDirectionAction = tclac_ns.class_(
+    "VerticalSwingDirectionAction", automation.Action
+)
+HorizontalSwingDirectionAction = tclac_ns.class_(
+    "HorizontalSwingDirectionAction", automation.Action
+)
 
-TCLAC_ACTION_BASE_SCHEMA = automation.maybe_simple_id({cv.GenerateID(CONF_ID): cv.use_id(tclacClimate),})
+TCLAC_ACTION_BASE_SCHEMA = automation.maybe_simple_id(
+    {
+        cv.GenerateID(CONF_ID): cv.use_id(tclacClimate),
+    }
+)
+
 
 # Регистрация событий включения и отключения дисплея кондиционера
-@automation.register_action(
-    "climate.tclac.display_on", DisplayOnAction, cv.Schema
-)
-@automation.register_action(
-    "climate.tclac.display_off", DisplayOffAction, cv.Schema
-)
+@automation.register_action("climate.tclac.display_on", DisplayOnAction, cv.Schema)
+@automation.register_action("climate.tclac.display_off", DisplayOffAction, cv.Schema)
 async def display_action_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
     return var
 
+
 # Регистрация событий включения и отключения пищалки кондиционера
-@automation.register_action(
-    "climate.tclac.beeper_on", BeeperOnAction, cv.Schema
-)
-@automation.register_action(
-    "climate.tclac.beeper_off", BeeperOffAction, cv.Schema
-)
+@automation.register_action("climate.tclac.beeper_on", BeeperOnAction, cv.Schema)
+@automation.register_action("climate.tclac.beeper_off", BeeperOffAction, cv.Schema)
 async def beeper_action_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
     return var
+
 
 # Регистрация событий включения и отключения светодиодов связи модуля
 @automation.register_action(
@@ -217,18 +286,16 @@ async def module_display_action_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
     return var
-    
+
+
 # Регистрация событий включения и отключения принудительного применения настроек
-@automation.register_action(
-    "climate.tclac.force_mode_on", ForceOnAction, cv.Schema
-)
-@automation.register_action(
-    "climate.tclac.force_mode_off", ForceOffAction, cv.Schema
-)
+@automation.register_action("climate.tclac.force_mode_on", ForceOnAction, cv.Schema)
+@automation.register_action("climate.tclac.force_mode_off", ForceOffAction, cv.Schema)
 async def force_mode_action_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
     return var
+
 
 # Регистрация события установки вертикальной фиксации заслонки
 @automation.register_action(
@@ -237,7 +304,9 @@ async def force_mode_action_to_code(config, action_id, template_arg, args):
     cv.Schema(
         {
             cv.GenerateID(): cv.use_id(tclacClimate),
-            cv.Required(CONF_VERTICAL_AIRFLOW): cv.templatable(cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)),
+            cv.Required(CONF_VERTICAL_AIRFLOW): cv.templatable(
+                cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)
+            ),
         }
     ),
 )
@@ -258,14 +327,18 @@ async def tclac_set_vertical_airflow_to_code(config, action_id, template_arg, ar
     cv.Schema(
         {
             cv.GenerateID(): cv.use_id(tclacClimate),
-            cv.Required(CONF_HORIZONTAL_AIRFLOW): cv.templatable(cv.enum(AIRFLOW_HORIZONTAL_DIRECTION_OPTIONS, upper=True)),
+            cv.Required(CONF_HORIZONTAL_AIRFLOW): cv.templatable(
+                cv.enum(AIRFLOW_HORIZONTAL_DIRECTION_OPTIONS, upper=True)
+            ),
         }
     ),
 )
 async def tclac_set_horizontal_airflow_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
-    template_ = await cg.templatable(config[CONF_HORIZONTAL_AIRFLOW], args, AirflowHorizontalDirection)
+    template_ = await cg.templatable(
+        config[CONF_HORIZONTAL_AIRFLOW], args, AirflowHorizontalDirection
+    )
     cg.add(var.set_direction(template_))
     return var
 
@@ -277,14 +350,20 @@ async def tclac_set_horizontal_airflow_to_code(config, action_id, template_arg, 
     cv.Schema(
         {
             cv.GenerateID(): cv.use_id(tclacClimate),
-            cv.Required(CONF_VERTICAL_SWING_MODE): cv.templatable(cv.enum(VERTICAL_SWING_DIRECTION_OPTIONS, upper=True)),
+            cv.Required(CONF_VERTICAL_SWING_MODE): cv.templatable(
+                cv.enum(VERTICAL_SWING_DIRECTION_OPTIONS, upper=True)
+            ),
         }
     ),
 )
-async def tclac_set_vertical_swing_direction_to_code(config, action_id, template_arg, args):
+async def tclac_set_vertical_swing_direction_to_code(
+    config, action_id, template_arg, args
+):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
-    template_ = await cg.templatable(config[CONF_VERTICAL_SWING_MODE], args, VerticalSwingDirection)
+    template_ = await cg.templatable(
+        config[CONF_VERTICAL_SWING_MODE], args, VerticalSwingDirection
+    )
     cg.add(var.set_swing_direction(template_))
     return var
 
@@ -296,14 +375,20 @@ async def tclac_set_vertical_swing_direction_to_code(config, action_id, template
     cv.Schema(
         {
             cv.GenerateID(): cv.use_id(tclacClimate),
-            cv.Required(CONF_HORIZONTAL_SWING_MODE): cv.templatable(cv.enum(HORIZONTAL_SWING_DIRECTION_OPTIONS, upper=True)),
+            cv.Required(CONF_HORIZONTAL_SWING_MODE): cv.templatable(
+                cv.enum(HORIZONTAL_SWING_DIRECTION_OPTIONS, upper=True)
+            ),
         }
     ),
 )
-async def tclac_set_horizontal_swing_direction_to_code(config, action_id, template_arg, args):
+async def tclac_set_horizontal_swing_direction_to_code(
+    config, action_id, template_arg, args
+):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
-    template_ = await cg.templatable(config[CONF_HORIZONTAL_SWING_MODE], args, HorizontalSwingDirection)
+    template_ = await cg.templatable(
+        config[CONF_HORIZONTAL_SWING_MODE], args, HorizontalSwingDirection
+    )
     cg.add(var.set_swing_direction(template_))
     return var
 
