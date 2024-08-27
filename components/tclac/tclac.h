@@ -8,7 +8,7 @@
 #ifndef TCL_ESP_TCL_H
 #define TCL_ESP_TCL_H
 
-#include "esphome.h"
+//#include "esphome.h"
 #include "esphome/components/climate/climate.h"
 #include "esphome/components/uart/uart.h"
 #include "esphome/core/defines.h"
@@ -54,35 +54,38 @@ using climate::ClimatePreset;
 using climate::ClimateSwingMode;
 using climate::ClimateTraits;
 
-enum class VerticalSwingDirection : uint8_t {
-  UP_DOWN = 0,
-  UPSIDE = 1,
-  DOWNSIDE = 2,
-};
-enum class HorizontalSwingDirection : uint8_t {
-  LEFT_RIGHT = 0,
-  LEFTSIDE = 1,
-  CENTER = 2,
-  RIGHTSIDE = 3,
-};
-enum class AirflowVerticalDirection : uint8_t {
-  LAST = 0,
-  MAX_UP = 1,
-  UP = 2,
-  CENTER = 3,
-  DOWN = 4,
-  MAX_DOWN = 5,
-};
-enum class AirflowHorizontalDirection : uint8_t {
-  LAST = 0,
-  MAX_LEFT = 1,
-  LEFT = 2,
-  CENTER = 3,
-  RIGHT = 4,
-  MAX_RIGHT = 5,
+enum VerticalSwingDirection : uint8_t {
+  UP_DOWN,
+  UPSIDE,
+  DOWNSIDE,
 };
 
-class tclacClimate : public climate::Climate, public esphome::uart::UARTDevice, public PollingComponent {
+enum HorizontalSwingDirection : uint8_t {
+  LEFT_RIGHT,
+  LEFTSIDE,
+  CENTER,
+  RIGHTSIDE,
+};
+
+enum AirflowVerticalDirection : uint8_t {
+  LAST,
+  MAX_UP,
+  UP,
+  CENTER,
+  DOWN,
+  MAX_DOWN,
+};
+
+enum AirflowHorizontalDirection : uint8_t {
+  LAST,
+  MAX_LEFT,
+  LEFT,
+  CENTER,
+  RIGHT,
+  MAX_RIGHT,
+};
+
+class TclClimate : public climate::Climate, public esphome::uart::UARTDevice, public PollingComponent {
  private:
   byte checksum;
   // dataTX с управлением состоит из 38 байт
@@ -107,7 +110,7 @@ class tclacClimate : public climate::Climate, public esphome::uart::UARTDevice, 
   esphome::climate::ClimateTraits traits_;
 
  public:
-  tclacClimate() : PollingComponent(5 * 1000) { checksum = 0; }
+  TclClimate() : PollingComponent(5 * 1000) { checksum = 0; }
 
   void readData();
   void takeControl();

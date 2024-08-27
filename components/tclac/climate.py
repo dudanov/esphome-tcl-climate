@@ -42,8 +42,8 @@ CONF_VERTICAL_SWING_MODE = "vertical_swing_mode"
 CONF_HORIZONTAL_SWING_MODE = "horizontal_swing_mode"
 
 tclac_ns = cg.esphome_ns.namespace("tclac")
-tclacClimate = tclac_ns.class_(
-    "tclacClimate", uart.UARTDevice, climate.Climate, cg.PollingComponent
+TclClimate = tclac_ns.class_(
+    "TclClimate", uart.UARTDevice, climate.Climate, cg.PollingComponent
 )
 
 SUPPORTED_FAN_MODES_OPTIONS = {
@@ -165,7 +165,7 @@ def validate_visual(config):
 CONFIG_SCHEMA = cv.All(
     climate.CLIMATE_SCHEMA.extend(
         {
-            cv.GenerateID(): cv.declare_id(tclacClimate),
+            cv.GenerateID(): cv.declare_id(TclClimate),
             cv.Optional(CONF_BEEPER, default=True): cv.boolean,
             cv.Optional(CONF_DISPLAY, default=True): cv.boolean,
             cv.Optional(CONF_RX_LED): pins.gpio_output_pin_schema,
@@ -252,7 +252,7 @@ HorizontalSwingDirectionAction = tclac_ns.class_(
 
 TCLAC_ACTION_BASE_SCHEMA = automation.maybe_simple_id(
     {
-        cv.GenerateID(CONF_ID): cv.use_id(tclacClimate),
+        cv.GenerateID(CONF_ID): cv.use_id(TclClimate),
     }
 )
 
@@ -303,7 +303,7 @@ async def force_mode_action_to_code(config, action_id, template_arg, args):
     VerticalAirflowAction,
     cv.Schema(
         {
-            cv.GenerateID(): cv.use_id(tclacClimate),
+            cv.GenerateID(): cv.use_id(TclClimate),
             cv.Required(CONF_VERTICAL_AIRFLOW): cv.templatable(
                 cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)
             ),
@@ -326,7 +326,7 @@ async def tclac_set_vertical_airflow_to_code(config, action_id, template_arg, ar
     HorizontalAirflowAction,
     cv.Schema(
         {
-            cv.GenerateID(): cv.use_id(tclacClimate),
+            cv.GenerateID(): cv.use_id(TclClimate),
             cv.Required(CONF_HORIZONTAL_AIRFLOW): cv.templatable(
                 cv.enum(AIRFLOW_HORIZONTAL_DIRECTION_OPTIONS, upper=True)
             ),
@@ -349,7 +349,7 @@ async def tclac_set_horizontal_airflow_to_code(config, action_id, template_arg, 
     VerticalSwingDirectionAction,
     cv.Schema(
         {
-            cv.GenerateID(): cv.use_id(tclacClimate),
+            cv.GenerateID(): cv.use_id(TclClimate),
             cv.Required(CONF_VERTICAL_SWING_MODE): cv.templatable(
                 cv.enum(VERTICAL_SWING_DIRECTION_OPTIONS, upper=True)
             ),
@@ -374,7 +374,7 @@ async def tclac_set_vertical_swing_direction_to_code(
     HorizontalSwingDirectionAction,
     cv.Schema(
         {
-            cv.GenerateID(): cv.use_id(tclacClimate),
+            cv.GenerateID(): cv.use_id(TclClimate),
             cv.Required(CONF_HORIZONTAL_SWING_MODE): cv.templatable(
                 cv.enum(HORIZONTAL_SWING_DIRECTION_OPTIONS, upper=True)
             ),
