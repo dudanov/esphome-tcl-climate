@@ -1,7 +1,7 @@
 time:
   - platform: homeassistant
     id: my_time
-        
+
 sensor:
   - platform: wifi_signal
     id: wifi_strenght
@@ -16,7 +16,7 @@ font:
     size: 16
     bpp: 1
     glyphs: '!"%()+=,-_.:°/?0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzАБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЬЭЮЯЫабвгдежзиклмнопрстуфхцчшщъыьэюя'
-    
+
   - file: "gfonts://Press Start 2P"
     id: font2
     size: 8

@@ -13,12 +13,12 @@ substitutions:
 
 packages:
   remote_package:
-    url: https://github.com/I-am-nightingale/tclac.git
-    ref: master
+    url: https://github.com/dudanov/esphome-tcl-climate.git
+    ref: dev
     files:
       - packages/core.yaml
     refresh: 30s
-    
+
 esphome:
   platform: ESP32
   board: nodemcu-32s
