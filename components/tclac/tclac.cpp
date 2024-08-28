@@ -432,27 +432,27 @@ void TclClimate::takeControl() {
   }
   // Устанавливаем положение фиксации вертикальной заслонки
   switch (vertical_direction_) {
-    case AirflowVerticalDirection::LAST:
+    case AirflowVerticalDirection::AFV_LAST:
       dataTX[32] += 0b00000000;
       ESP_LOGD(TAG, "Vertical fix: last position");
       break;
-    case AirflowVerticalDirection::MAX_UP:
+    case AirflowVerticalDirection::AFV_MAX_UP:
       dataTX[32] += 0b00000001;
       ESP_LOGD(TAG, "Vertical fix: up");
       break;
-    case AirflowVerticalDirection::UP:
+    case AirflowVerticalDirection::AFV_UP:
       dataTX[32] += 0b00000010;
       ESP_LOGD(TAG, "Vertical fix: upper");
       break;
-    case AirflowVerticalDirection::CENTER:
+    case AirflowVerticalDirection::AFV_CENTER:
       dataTX[32] += 0b00000011;
       ESP_LOGD(TAG, "Vertical fix: center");
       break;
-    case AirflowVerticalDirection::DOWN:
+    case AirflowVerticalDirection::AFV_DOWN:
       dataTX[32] += 0b00000100;
       ESP_LOGD(TAG, "Vertical fix: downer");
       break;
-    case AirflowVerticalDirection::MAX_DOWN:
+    case AirflowVerticalDirection::AFV_MAX_DOWN:
       dataTX[32] += 0b00000101;
       ESP_LOGD(TAG, "Vertical fix: down");
       break;

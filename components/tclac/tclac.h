@@ -65,13 +65,13 @@ enum class HorizontalSwingDirection : uint8_t {
   RIGHTSIDE,
 };
 
-enum class AirflowVerticalDirection : uint8_t {
-  LAST,
-  MAX_UP,
-  UP,
-  CENTER,
-  DOWN,
-  MAX_DOWN,
+enum AirflowVerticalDirection : uint8_t {
+  AFV_LAST,
+  AFV_MAX_UP,
+  AFV_UP,
+  AFV_CENTER,
+  AFV_DOWN,
+  AFV_MAX_DOWN,
 };
 
 enum class AirflowHorizontalDirection : uint8_t {

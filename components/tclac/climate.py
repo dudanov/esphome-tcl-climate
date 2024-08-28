@@ -137,7 +137,7 @@ HORIZONTAL_SWING_DIRECTION_OPTIONS = {
     "RIGHTSIDE": HorizontalSwingDirection.RIGHTSIDE,
 }
 
-AirflowVerticalDirection = tclac_ns.enum("AirflowVerticalDirection", True)
+AirflowVerticalDirection = tclac_ns.enum("AirflowVerticalDirection")
 AIRFLOW_VERTICAL_DIRECTION_OPTIONS = {
     "LAST": AirflowVerticalDirection.LAST,
     "MAX_UP": AirflowVerticalDirection.MAX_UP,
@@ -340,7 +340,7 @@ async def force_mode_action_to_code(config, action_id, template_arg, args):
         {
             cv.GenerateID(): cv.use_id(TclClimate),
             cv.Required(CONF_VERTICAL_AIRFLOW): cv.templatable(
-                cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)
+                cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS)
             ),
         },
     ),
