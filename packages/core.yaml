@@ -203,7 +203,7 @@ select:
     restore_value: true
     on_value:
       then:
-        tclac.set_vertical_airflow: !lambda "return i;"
+        tclac.set_vertical_airflow: !lambda "return static_cast<esphome::tclac::AirflowVerticalDirection>(i);"
   #        lambda: !lambda |-
   #          if (id(vfixing).active_index() == 0){
   #            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::LAST);
