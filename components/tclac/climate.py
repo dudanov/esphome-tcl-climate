@@ -31,8 +31,6 @@ TCLAC_MAX_TEMPERATURE = 31.0
 TCLAC_TARGET_TEMPERATURE_STEP = 1.0
 TCLAC_CURRENT_TEMPERATURE_STEP = 1.0
 
-CONF_RX_LED = "rx_led"
-CONF_TX_LED = "tx_led"
 CONF_DISPLAY = "show_display"
 CONF_FORCE_MODE = "force_mode"
 CONF_VERTICAL_AIRFLOW = "vertical_airflow"
@@ -168,8 +166,6 @@ CONFIG_SCHEMA = cv.All(
             cv.GenerateID(): cv.declare_id(TclClimate),
             cv.Optional(CONF_BEEPER, default=True): cv.boolean,
             cv.Optional(CONF_DISPLAY, default=True): cv.boolean,
-            cv.Optional(CONF_RX_LED): pins.gpio_output_pin_schema,
-            cv.Optional(CONF_TX_LED): pins.gpio_output_pin_schema,
             cv.Optional(CONF_FORCE_MODE, default=True): cv.boolean,
             cv.Optional(CONF_MODULE_DISPLAY, default=True): cv.boolean,
             cv.Optional(CONF_VERTICAL_AIRFLOW, default="CENTER"): cv.ensure_list(
@@ -416,12 +412,3 @@ def to_code(config):
         cg.add(var.set_supported_fan_modes(config[CONF_SUPPORTED_FAN_MODES]))
     if CONF_SUPPORTED_SWING_MODES in config:
         cg.add(var.set_supported_swing_modes(config[CONF_SUPPORTED_SWING_MODES]))
-
-    if CONF_TX_LED in config:
-        cg.add_define("CONF_TX_LED")
-        tx_led_pin = yield cg.gpio_pin_expression(config[CONF_TX_LED])
-        cg.add(var.set_tx_led_pin(tx_led_pin))
-    if CONF_RX_LED in config:
-        cg.add_define("CONF_RX_LED")
-        rx_led_pin = yield cg.gpio_pin_expression(config[CONF_RX_LED])
-        cg.add(var.set_rx_led_pin(rx_led_pin))

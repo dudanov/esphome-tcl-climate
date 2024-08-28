@@ -97,14 +97,11 @@ class TclClimate : public climate::Climate, public esphome::uart::UARTDevice, pu
   void takeControl();
   void set_beeper_state(bool state);
   void set_display_state(bool state);
-  void dataShow(bool flow, bool shine);
   void set_force_mode_state(bool state);
-  void set_rx_led_pin(GPIOPin *rx_led_pin);
-  void set_tx_led_pin(GPIOPin *tx_led_pin);
   void sendData(uint8_t *message, uint8_t size);
   void set_module_display_state(bool state);
   void control(const ClimateCall &call) override;
-  static uint8_t getChecksum(const uint8_t *message, size_t size);
+  static uint8_t getChecksum(const uint8_t *msg, size_t size);
   void set_vertical_airflow(AirflowVerticalDirection direction);
   void set_horizontal_airflow(AirflowHorizontalDirection direction);
   void set_vertical_swing_direction(VerticalSwingDirection direction);
@@ -119,9 +116,6 @@ class TclClimate : public climate::Climate, public esphome::uart::UARTDevice, pu
   static const uint8_t poll[8];
 
   ClimateTraits traits() override;
-
-  GPIOPin *rx_led_pin_;
-  GPIOPin *tx_led_pin_;
 
   AirflowVerticalDirection vertical_direction_;
   AirflowHorizontalDirection horizontal_direction_;

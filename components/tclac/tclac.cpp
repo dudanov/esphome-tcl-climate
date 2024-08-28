@@ -50,12 +50,10 @@ void TclClimate::setup() {
 void TclClimate::loop() {
   // Если в буфере UART что-то есть, то читаем это что-то
   if (esphome::uart::UARTDevice::available() > 0) {
-    dataShow(0, true);
     dataRX[0] = esphome::uart::UARTDevice::read();
     // Если принятый байт- не заголовок (0xBB), то просто покидаем цикл
     if (dataRX[0] != 0xBB) {
       ESP_LOGD("TCL", "Wrong byte");
-      dataShow(0, 0);
       return;
     }
     // А вот если совпал заголовок (0xBB), то начинаем чтение по цепочке еще 4 байт
@@ -73,32 +71,26 @@ void TclClimate::loop() {
     // ESP_LOGD("TCL", "first 5 byte : %s ", raw.c_str());
 
     // Из первых 5 байт нам нужен пятый- он содержит длину сообщения
-    esphome::uart::UARTDevice::read_array(dataRX + 5, dataRX[4] + 1);
-
-    uint8_t check = getChecksum(dataRX, sizeof(dataRX));
+    read_array(dataRX + 5, dataRX[4] + 1);
 
     ESP_LOGD(TAG, "RX: %s", format_hex_pretty(dataRX, sizeof(dataRX)).c_str());
 
     // Проверяем контрольную сумму
-    if (check != dataRX[60]) {
+    if (getChecksum(dataRX, sizeof(dataRX))) {
       ESP_LOGD("TCL", "Invalid checksum %x", check);
-      TclClimate::dataShow(0, 0);
+
       return;
-    } else {
-      // ESP_LOGD("TCL", "checksum OK %x", check);
     }
-    TclClimate::dataShow(0, 0);
+
     // Прочитав все из буфера приступаем к разбору данных
     TclClimate::readData();
   }
 }
 
 void TclClimate::update() {
-  TclClimate::dataShow(1, 1);
   this->esphome::uart::UARTDevice::write_array(poll, sizeof(poll));
   // auto raw = TclClimate::getHex(poll, sizeof(poll));
   // ESP_LOGD("TCL", "chek status sended");
-  TclClimate::dataShow(1, 0);
 }
 
 void TclClimate::readData() {
@@ -543,49 +535,21 @@ void TclClimate::takeControl() {
 
 // Отправка данных в кондиционер
 void TclClimate::sendData(uint8_t *message, uint8_t size) {
-  TclClimate::dataShow(1, 1);
   // Serial.write(message, size);
   this->esphome::uart::UARTDevice::write_array(message, size);
   // auto raw = getHex(message, size);
   ESP_LOGD("TCL", "Message to TCL sended...");
-  TclClimate::dataShow(1, 0);
 }
 
 // Вычисление контрольной суммы
-uint8_t TclClimate::getChecksum(const uint8_t *message, size_t size) {
-  uint8_t position = size - 1;
+uint8_t TclClimate::getChecksum(const uint8_t *msg, size_t size) {
   uint8_t crc = 0;
-  for (int i = 0; i < position; i++)
-    crc ^= message[i];
-  return crc;
-}
 
-// Мигаем светодиодами
-void TclClimate::dataShow(bool flow, bool shine) {
-  if (module_display_status_) {
-    if (flow == 0) {
-      if (shine == 1) {
-#ifdef CONF_RX_LED
-        this->rx_led_pin_->digital_write(true);
-#endif
-      } else {
-#ifdef CONF_RX_LED
-        this->rx_led_pin_->digital_write(false);
-#endif
-      }
-    }
-    if (flow == 1) {
-      if (shine == 1) {
-#ifdef CONF_TX_LED
-        this->tx_led_pin_->digital_write(true);
-#endif
-      } else {
-#ifdef CONF_TX_LED
-        this->tx_led_pin_->digital_write(false);
-#endif
-      }
-    }
-  }
+  do {
+    crc ^= *msg++;
+  } while (--size);
+
+  return crc;
 }
 
 // Действия с данными из конфига
