@@ -36,72 +36,59 @@ ClimateTraits TclClimate::traits() {
   return traits;
 }
 
-void TclClimate::setup() {
-#ifdef CONF_RX_LED
-  this->rx_led_pin_->setup();
-  this->rx_led_pin_->digital_write(false);
-#endif
-#ifdef CONF_TX_LED
-  this->tx_led_pin_->setup();
-  this->tx_led_pin_->digital_write(false);
-#endif
-}
+void TclClimate::setup() {}
 
 void TclClimate::loop() {
-  // Если в буфере UART что-то есть, то читаем это что-то
-  if (esphome::uart::UARTDevice::available() > 0) {
-    dataRX[0] = esphome::uart::UARTDevice::read();
-    // Если принятый байт- не заголовок (0xBB), то просто покидаем цикл
-    if (dataRX[0] != 0xBB) {
-      ESP_LOGD("TCL", "Wrong byte");
-      return;
-    }
-    // А вот если совпал заголовок (0xBB), то начинаем чтение по цепочке еще 4 байт
-    delay(5);
-    dataRX[1] = esphome::uart::UARTDevice::read();
-    delay(5);
-    dataRX[2] = esphome::uart::UARTDevice::read();
-    delay(5);
-    dataRX[3] = esphome::uart::UARTDevice::read();
-    delay(5);
-    dataRX[4] = esphome::uart::UARTDevice::read();
+  if (!esphome::uart::UARTDevice::available())
+    return;
 
-    // auto raw = getHex(dataRX, 5);
+  // В буфере UART что-то есть, то читаем это что-то
 
-    // ESP_LOGD("TCL", "first 5 byte : %s ", raw.c_str());
+  dataRX[0] = esphome::uart::UARTDevice::read();
 
-    // Из первых 5 байт нам нужен пятый- он содержит длину сообщения
-    read_array(dataRX + 5, dataRX[4] + 1);
+  // Если принятый байт- не заголовок (0xBB), то просто покидаем цикл
+  if (dataRX[0] != 0xBB) {
+    ESP_LOGD(TAG, "Wrong byte");
+    return;
+  }
 
-    ESP_LOGD(TAG, "RX: %s", format_hex_pretty(dataRX, sizeof(dataRX)).c_str());
+  // А вот если совпал заголовок (0xBB), то начинаем чтение по цепочке еще 4 байт
+  delay(5);
+  dataRX[1] = esphome::uart::UARTDevice::read();
+  delay(5);
+  dataRX[2] = esphome::uart::UARTDevice::read();
+  delay(5);
+  dataRX[3] = esphome::uart::UARTDevice::read();
+  delay(5);
+  dataRX[4] = esphome::uart::UARTDevice::read();
 
-    // Проверяем контрольную сумму
-    if (getChecksum(dataRX, sizeof(dataRX))) {
-      ESP_LOGD("TCL", "Invalid checksum.");
+  // Из первых 5 байт нам нужен пятый- он содержит длину сообщения
+  read_array(dataRX + 5, dataRX[4] + 1);
 
-      return;
-    }
+  ESP_LOGD(TAG, "RX: %s", format_hex_pretty(dataRX, sizeof(dataRX)).c_str());
 
+  // Проверяем контрольную сумму
+  if (!getChecksum(dataRX, sizeof(dataRX))) {
     // Прочитав все из буфера приступаем к разбору данных
     TclClimate::readData();
+
+    return;
   }
+
+  ESP_LOGD(TAG, "Invalid checksum.");
 }
 
 void TclClimate::update() {
-  this->esphome::uart::UARTDevice::write_array(poll, sizeof(poll));
-  // auto raw = TclClimate::getHex(poll, sizeof(poll));
-  // ESP_LOGD("TCL", "chek status sended");
+  this->write_array(poll, sizeof(poll));
+  ESP_LOGD(TAG, "TX: %s", format_hex_pretty(poll, sizeof(poll)));
 }
 
 void TclClimate::readData() {
   this->current_temperature = fahrenheit_to_celsius(encode_uint16(dataRX[17], dataRX[18]) / 374.0f);
   this->target_temperature = (dataRX[FAN_SPEED_POS] & SET_TEMP_MASK) + 16;
 
-  // ESP_LOGD("TCL", "TEMP: %f ", current_temperature);
-
   if (dataRX[MODE_POS] & (1 << 4)) {
     // Если кондиционер включен, то разбираем данные для отображения
-    // ESP_LOGD("TCL", "AC is on");
     uint8_t modeswitch = MODE_MASK & dataRX[MODE_POS];
     uint8_t fanspeedswitch = FAN_SPEED_MASK & dataRX[FAN_SPEED_POS];
     uint8_t swingmodeswitch = SWING_MODE_MASK & dataRX[SWING_POS];
@@ -110,26 +97,33 @@ void TclClimate::readData() {
       case MODE_AUTO:
         mode = climate::CLIMATE_MODE_AUTO;
         break;
+
       case MODE_COOL:
         mode = climate::CLIMATE_MODE_COOL;
         break;
+
       case MODE_DRY:
         mode = climate::CLIMATE_MODE_DRY;
         break;
+
       case MODE_FAN_ONLY:
         mode = climate::CLIMATE_MODE_FAN_ONLY;
         break;
+
       case MODE_HEAT:
         mode = climate::CLIMATE_MODE_HEAT;
         break;
+
       default:
         mode = climate::CLIMATE_MODE_AUTO;
     }
 
     if (dataRX[FAN_QUIET_POS] & FAN_QUIET) {
       fan_mode = climate::CLIMATE_FAN_QUIET;
+
     } else if (dataRX[MODE_POS] & FAN_DIFFUSE) {
       fan_mode = climate::CLIMATE_FAN_DIFFUSE;
+
     } else {
       switch (fanspeedswitch) {
         case FAN_AUTO:
@@ -182,11 +176,12 @@ void TclClimate::readData() {
 
   } else {
     // Если кондиционер выключен, то все режимы показываются, как выключенные
-    mode = climate::CLIMATE_MODE_OFF;
+    this->mode = climate::CLIMATE_MODE_OFF;
     // fan_mode = climate::CLIMATE_FAN_OFF;
-    swing_mode = climate::CLIMATE_SWING_OFF;
-    preset = ClimatePreset::CLIMATE_PRESET_NONE;
+    this->swing_mode = climate::CLIMATE_SWING_OFF;
+    this->preset = ClimatePreset::CLIMATE_PRESET_NONE;
   }
+
   // Публикуем данные
   this->publish_state();
   allow_take_control = true;
@@ -197,15 +192,17 @@ void TclClimate::control(const ClimateCall &call) {
   // Запрашиваем данные из переключателя режимов работы кондиционера
   if (call.get_mode().has_value()) {
     switch_climate_mode = call.get_mode().value();
-    ESP_LOGD("TCL", "Get MODE from call");
+    ESP_LOGD(TAG, "Get MODE from call");
+
   } else {
     switch_climate_mode = mode;
-    ESP_LOGD("TCL", "Get MODE from AC");
+    ESP_LOGD(TAG, "Get MODE from AC");
   }
 
   // Запрашиваем данные из переключателя предустановок кондиционера
   if (call.get_preset().has_value()) {
     switch_preset = call.get_preset().value();
+
   } else {
     switch_preset = preset.value();
   }
@@ -213,6 +210,7 @@ void TclClimate::control(const ClimateCall &call) {
   // Запрашиваем данные из переключателя режимов вентилятора
   if (call.get_fan_mode().has_value()) {
     switch_fan_mode = call.get_fan_mode().value();
+
   } else {
     switch_fan_mode = fan_mode.value();
   }
@@ -220,6 +218,7 @@ void TclClimate::control(const ClimateCall &call) {
   // Запрашиваем данные из переключателя режимов качания заслонок
   if (call.get_swing_mode().has_value()) {
     switch_swing_mode = call.get_swing_mode().value();
+
   } else {
     // А если в переключателе пусто- заполняем значением из последнего опроса состояния. Типа, ничего не поменялось.
     switch_swing_mode = swing_mode;
@@ -228,6 +227,7 @@ void TclClimate::control(const ClimateCall &call) {
   // Расчет температуры
   if (call.get_target_temperature().has_value()) {
     target_temperature_set = 31 - (int) call.get_target_temperature().value();
+
   } else {
     target_temperature_set = 31 - (int) target_temperature;
   }
@@ -248,7 +248,7 @@ void TclClimate::takeControl() {
   dataTX[33] = 0b00000000;
 
   if (is_call_control != true) {
-    ESP_LOGD("TCL", "Get MODE from AC for force config");
+    ESP_LOGD(TAG, "Get MODE from AC for force config");
     switch_climate_mode = mode;
     switch_preset = preset.value();
     switch_fan_mode = fan_mode.value();
@@ -258,10 +258,10 @@ void TclClimate::takeControl() {
 
   // Включаем или отключаем пищалку в зависимости от переключателя в настройках
   if (beeper_status_) {
-    ESP_LOGD("TCL", "Beep mode ON");
+    ESP_LOGD(TAG, "Beep mode ON");
     dataTX[7] += 0b00100000;
   } else {
-    ESP_LOGD("TCL", "Beep mode OFF");
+    ESP_LOGD(TAG, "Beep mode OFF");
     dataTX[7] += 0b00000000;
   }
 
@@ -271,10 +271,10 @@ void TclClimate::takeControl() {
   // ВНИМАНИЕ! При выключении дисплея кондиционер сам принудительно переходит в автоматический режим!
 
   if ((display_status_) && (switch_climate_mode != climate::CLIMATE_MODE_OFF)) {
-    ESP_LOGD("TCL", "Dispaly turn ON");
+    ESP_LOGD(TAG, "Dispaly turn ON");
     dataTX[7] += 0b01000000;
   } else {
-    ESP_LOGD("TCL", "Dispaly turn OFF");
+    ESP_LOGD(TAG, "Dispaly turn OFF");
     dataTX[7] += 0b00000000;
   }
 
@@ -400,88 +400,88 @@ void TclClimate::takeControl() {
   switch (vertical_swing_direction_) {
     case VerticalSwingDirection::UP_DOWN:
       dataTX[32] += 0b00001000;
-      ESP_LOGD("TCL", "Vertical swing: up-down");
+      ESP_LOGD(TAG, "Vertical swing: up-down");
       break;
     case VerticalSwingDirection::UPSIDE:
       dataTX[32] += 0b00010000;
-      ESP_LOGD("TCL", "Vertical swing: upper");
+      ESP_LOGD(TAG, "Vertical swing: upper");
       break;
     case VerticalSwingDirection::DOWNSIDE:
       dataTX[32] += 0b00011000;
-      ESP_LOGD("TCL", "Vertical swing: downer");
+      ESP_LOGD(TAG, "Vertical swing: downer");
       break;
   }
   // Устанавливаем режим для качания горизонтальных заслонок
   switch (horizontal_swing_direction_) {
     case HorizontalSwingDirection::LEFT_RIGHT:
       dataTX[33] += 0b00001000;
-      ESP_LOGD("TCL", "Horizontal swing: left-right");
+      ESP_LOGD(TAG, "Horizontal swing: left-right");
       break;
     case HorizontalSwingDirection::LEFTSIDE:
       dataTX[33] += 0b00010000;
-      ESP_LOGD("TCL", "Horizontal swing: lefter");
+      ESP_LOGD(TAG, "Horizontal swing: lefter");
       break;
     case HorizontalSwingDirection::CENTER:
       dataTX[33] += 0b00011000;
-      ESP_LOGD("TCL", "Horizontal swing: center");
+      ESP_LOGD(TAG, "Horizontal swing: center");
       break;
     case HorizontalSwingDirection::RIGHTSIDE:
       dataTX[33] += 0b00100000;
-      ESP_LOGD("TCL", "Horizontal swing: righter");
+      ESP_LOGD(TAG, "Horizontal swing: righter");
       break;
   }
   // Устанавливаем положение фиксации вертикальной заслонки
   switch (vertical_direction_) {
     case AirflowVerticalDirection::LAST:
       dataTX[32] += 0b00000000;
-      ESP_LOGD("TCL", "Vertical fix: last position");
+      ESP_LOGD(TAG, "Vertical fix: last position");
       break;
     case AirflowVerticalDirection::MAX_UP:
       dataTX[32] += 0b00000001;
-      ESP_LOGD("TCL", "Vertical fix: up");
+      ESP_LOGD(TAG, "Vertical fix: up");
       break;
     case AirflowVerticalDirection::UP:
       dataTX[32] += 0b00000010;
-      ESP_LOGD("TCL", "Vertical fix: upper");
+      ESP_LOGD(TAG, "Vertical fix: upper");
       break;
     case AirflowVerticalDirection::CENTER:
       dataTX[32] += 0b00000011;
-      ESP_LOGD("TCL", "Vertical fix: center");
+      ESP_LOGD(TAG, "Vertical fix: center");
       break;
     case AirflowVerticalDirection::DOWN:
       dataTX[32] += 0b00000100;
-      ESP_LOGD("TCL", "Vertical fix: downer");
+      ESP_LOGD(TAG, "Vertical fix: downer");
       break;
     case AirflowVerticalDirection::MAX_DOWN:
       dataTX[32] += 0b00000101;
-      ESP_LOGD("TCL", "Vertical fix: down");
+      ESP_LOGD(TAG, "Vertical fix: down");
       break;
   }
   // Устанавливаем положение фиксации горизонтальных заслонок
   switch (horizontal_direction_) {
     case AirflowHorizontalDirection::LAST:
       dataTX[33] += 0b00000000;
-      ESP_LOGD("TCL", "Horizontal fix: last position");
+      ESP_LOGD(TAG, "Horizontal fix: last position");
       break;
     case AirflowHorizontalDirection::MAX_LEFT:
       dataTX[33] += 0b00000001;
-      ESP_LOGD("TCL", "Horizontal fix: left");
+      ESP_LOGD(TAG, "Horizontal fix: left");
       break;
     case AirflowHorizontalDirection::LEFT:
       dataTX[33] += 0b00000010;
-      ESP_LOGD("TCL", "Horizontal fix: lefter");
+      ESP_LOGD(TAG, "Horizontal fix: lefter");
       break;
     case AirflowHorizontalDirection::CENTER:
       dataTX[33] += 0b00000011;
-      ESP_LOGD("TCL", "Horizontal fix: center");
+      ESP_LOGD(TAG, "Horizontal fix: center");
       break;
     case AirflowHorizontalDirection::RIGHT:
       dataTX[33] += 0b00000100;
-      ESP_LOGD("TCL", "Horizontal fix: righter");
+      ESP_LOGD(TAG, "Horizontal fix: righter");
       break;
     case AirflowHorizontalDirection::MAX_RIGHT:
       dataTX[33] += 0b00000101;
-      ESP_LOGD("TCL", "Horizontal fix: right");
+      ESP_LOGD(TAG, "Horizontal fix: right");
       break;
   }
 
@@ -538,7 +538,7 @@ void TclClimate::sendData(uint8_t *message, uint8_t size) {
   // Serial.write(message, size);
   this->esphome::uart::UARTDevice::write_array(message, size);
   // auto raw = getHex(message, size);
-  ESP_LOGD("TCL", "Message to TCL sended...");
+  ESP_LOGD(TAG, "Message to TCL sended...");
 }
 
 // Вычисление контрольной суммы
