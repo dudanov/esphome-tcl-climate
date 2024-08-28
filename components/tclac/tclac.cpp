@@ -77,7 +77,7 @@ void TclClimate::loop() {
 
     // Проверяем контрольную сумму
     if (getChecksum(dataRX, sizeof(dataRX))) {
-      ESP_LOGD("TCL", "Invalid checksum %x", check);
+      ESP_LOGD("TCL", "Invalid checksum.");
 
       return;
     }
