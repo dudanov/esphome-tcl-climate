@@ -11,14 +11,21 @@ namespace esphome {
 namespace tclac {
 
 #ifdef USE_SWITCH
+class BaseSwitch : public switch_::Switch, public Parented<TclClimate> {};
 
-class BeeperSwitch : public switch_::Switch, public Parented<TclClimate> {
+class BeeperSwitch : public BaseSwitch {
   void write_state(bool state) override {
     this->parent_->set_beeper_state(state);
     this->publish_state(state);
   }
 };
 
+class DisplaySwitch : public BaseSwitch {
+  void write_state(bool state) override {
+    this->parent_->set_display_state(state);
+    this->publish_state(state);
+  }
+};
 #endif
 
 template<typename... Ts> class TclActionBase : public Action<Ts...>, public Parented<TclClimate> {};

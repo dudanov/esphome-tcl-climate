@@ -40,7 +40,7 @@ TCLAC_TARGET_TEMPERATURE_STEP = 1.0
 TCLAC_CURRENT_TEMPERATURE_STEP = 1.0
 
 CONF_TCL_ID = "tcl_id"
-CONF_DISPLAY = "show_display"
+CONF_DISPLAY = "display"
 CONF_FORCE_MODE = "force_mode"
 CONF_VERTICAL_AIRFLOW = "vertical_airflow"
 CONF_HORIZONTAL_AIRFLOW = "horizontal_airflow"
@@ -69,6 +69,14 @@ TclClimate = tclac_ns.class_(
 BeeperSwitch = tclac_ns.class_("BeeperSwitch", Switch)
 BEEPER_SWITCH_SCHEMA = switch_schema(
     BeeperSwitch,
+    entity_category=ENTITY_CATEGORY_CONFIG,
+    icon="mdi:volume-source",
+    default_restore_mode="RESTORE_DEFAULT_ON",
+).extend(tcl_parented_schema(TclClimate))
+
+DisplaySwitch = tclac_ns.class_("DisplaySwitch", Switch)
+DISPLAY_SWITCH_SCHEMA = switch_schema(
+    DisplaySwitch,
     entity_category=ENTITY_CATEGORY_CONFIG,
     icon="mdi:volume-source",
     default_restore_mode="RESTORE_DEFAULT_ON",
@@ -201,7 +209,7 @@ CONFIG_SCHEMA = cv.All(
         {
             cv.GenerateID(): cv.declare_id(TclClimate),
             cv.Optional(CONF_BEEPER): BEEPER_SWITCH_SCHEMA,
-            cv.Optional(CONF_DISPLAY, default=True): cv.boolean,
+            cv.Optional(CONF_DISPLAY): DISPLAY_SWITCH_SCHEMA,
             cv.Optional(CONF_FORCE_MODE, default=True): cv.boolean,
             cv.Optional(CONF_VERTICAL_AIRFLOW, default="CENTER"): cv.ensure_list(
                 cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)
@@ -429,7 +437,7 @@ async def to_code(config):
     if CONF_BEEPER in config:
         await new_tcl_switch(config[CONF_BEEPER])
     if CONF_DISPLAY in config:
-        cg.add(var.set_display_state(config[CONF_DISPLAY]))
+        await new_tcl_switch(config[CONF_DISPLAY])
     if CONF_FORCE_MODE in config:
         cg.add(var.set_force_mode_state(config[CONF_FORCE_MODE]))
     if CONF_SUPPORTED_MODES in config:
