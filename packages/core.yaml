@@ -203,20 +203,21 @@ select:
     restore_value: true
     on_value:
       then:
-        lambda: !lambda |-
-          if (id(vfixing).active_index() == 0){
-            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::LAST);
-          } else if (id(vfixing).active_index() == 1){
-            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::MAX_UP);
-          } else if (id(vfixing).active_index() == 2){
-            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::UP);
-          } else if (id(vfixing).active_index() == 3){
-            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::CENTER);
-          } else if (id(vfixing).active_index() == 4){
-            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::DOWN);
-          } else if (id(vfixing).active_index() == 5){
-            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::MAX_DOWN);
-          }
+        tclac.set_vertical_airflow: i
+  #        lambda: !lambda |-
+  #          if (id(vfixing).active_index() == 0){
+  #            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::LAST);
+  #          } else if (id(vfixing).active_index() == 1){
+  #            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::MAX_UP);
+  #          } else if (id(vfixing).active_index() == 2){
+  #            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::UP);
+  #          } else if (id(vfixing).active_index() == 3){
+  #            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::CENTER);
+  #          } else if (id(vfixing).active_index() == 4){
+  #            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::DOWN);
+  #          } else if (id(vfixing).active_index() == 5){
+  #            id(${device_name}).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::MAX_DOWN);
+  #          }
 
   # Настройка фиксации горизонатальных заслонок
   - platform: template

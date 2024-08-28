@@ -333,15 +333,16 @@ async def force_mode_action_to_code(config, action_id, template_arg, args):
 
 # Регистрация события установки вертикальной фиксации заслонки
 @automation.register_action(
-    "climate.tclac.set_vertical_airflow",
+    "tclac.set_vertical_airflow",
     VerticalAirflowAction,
-    cv.Schema(
+    automation.maybe_conf(
+        CONF_VERTICAL_AIRFLOW,
         {
             cv.GenerateID(): cv.use_id(TclClimate),
             cv.Required(CONF_VERTICAL_AIRFLOW): cv.templatable(
                 cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)
             ),
-        }
+        },
     ),
 )
 async def tclac_set_vertical_airflow_to_code(config, action_id, template_arg, args):
