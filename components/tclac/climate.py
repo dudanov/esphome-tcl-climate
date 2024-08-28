@@ -422,9 +422,9 @@ async def tclac_set_horizontal_swing_direction_to_code(
 # Добавление конфигурации в код
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    yield cg.register_component(var, config)
-    yield uart.register_uart_device(var, config)
-    yield climate.register_climate(var, config)
+    await cg.register_component(var, config)
+    await uart.register_uart_device(var, config)
+    await climate.register_climate(var, config)
 
     if CONF_BEEPER in config:
         await new_tcl_switch(config[CONF_BEEPER])
