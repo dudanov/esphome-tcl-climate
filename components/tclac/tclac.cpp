@@ -80,7 +80,7 @@ void TclClimate::loop() {
 
 void TclClimate::update() {
   this->write_array(poll, sizeof(poll));
-  ESP_LOGD(TAG, "TX: %s", format_hex_pretty(poll, sizeof(poll)));
+  ESP_LOGD(TAG, "TX: %s", format_hex_pretty(poll, sizeof(poll)).c_str());
 }
 
 void TclClimate::readData() {
