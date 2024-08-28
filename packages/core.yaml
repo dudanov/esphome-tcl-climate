@@ -272,5 +272,5 @@ climate:
     id: ${device_name}climate
   # Пищалка для подтверждения команд, по умолчанию выключена
     beeper:
-      - name: Beeper
+        name: Beeper
         id: beep_mode

@@ -259,19 +259,19 @@ CONFIG_SCHEMA = cv.All(
             ): cv.ensure_list(cv.enum(SUPPORTED_FAN_MODES_OPTIONS, upper=True)),
         }
     )
-    .extend(
-        uart.final_validate_device_schema(
-            name=NAME,
-            baud_rate=9600,
-            require_rx=True,
-            require_tx=True,
-            data_bits=8,
-            parity="EVEN",
-            stop_bits=1,
-        )
-    )
+    .extend(uart.UART_DEVICE_SCHEMA)
     .extend(cv.COMPONENT_SCHEMA),
     validate_visual,
+)
+
+FINAL_VALIDATE_SCHEMA = uart.final_validate_device_schema(
+    name=NAME,
+    baud_rate=9600,
+    require_rx=True,
+    require_tx=True,
+    data_bits=8,
+    parity="EVEN",
+    stop_bits=1,
 )
 
 ForceOnAction = tclac_ns.class_("ForceOnAction", automation.Action)
