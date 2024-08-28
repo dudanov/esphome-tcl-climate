@@ -526,7 +526,7 @@ void TclClimate::takeControl() {
   dataTX[35] = 0x00;  //??
   dataTX[36] = 0x00;  //??
   dataTX[37] = 0xFF;  // Контрольная сумма
-  dataTX[37] = TclClimate::getChecksum(dataTX, sizeof(dataTX));
+  dataTX[37] = TclClimate::getChecksum(dataTX, sizeof(dataTX) - 1);
 
   TclClimate::sendData(dataTX, sizeof(dataTX));
   allow_take_control = false;
@@ -538,7 +538,7 @@ void TclClimate::sendData(uint8_t *message, uint8_t size) {
   // Serial.write(message, size);
   this->esphome::uart::UARTDevice::write_array(message, size);
   // auto raw = getHex(message, size);
-  ESP_LOGD(TAG, "Message to TCL sended...");
+  ESP_LOGD(TAG, "TX: %s", format_hex_pretty(message, size).c_str());
 }
 
 // Вычисление контрольной суммы
