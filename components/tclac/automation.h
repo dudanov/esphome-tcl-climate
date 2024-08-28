@@ -13,7 +13,10 @@ namespace tclac {
 #ifdef USE_SWITCH
 
 class BeeperSwitch : public switch_::Switch, public Parented<TclClimate> {
-  void write_state(bool state) override { this->parent_->set_beeper_state(state); }
+  void write_state(bool state) override {
+    this->parent_->set_beeper_state(state);
+    this->publish_state(state);
+  }
 };
 
 #endif
