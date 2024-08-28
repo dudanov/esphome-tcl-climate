@@ -305,8 +305,8 @@ TCLAC_ACTION_BASE_SCHEMA = automation.maybe_simple_id(
 
 
 # Регистрация событий включения и отключения дисплея кондиционера
-@automation.register_action("climate.tclac.display_on", DisplayOnAction, cv.Schema)
-@automation.register_action("climate.tclac.display_off", DisplayOffAction, cv.Schema)
+@automation.register_action("tclac.display_on", DisplayOnAction, cv.Schema)
+@automation.register_action("tclac.display_off", DisplayOffAction, cv.Schema)
 async def display_action_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
@@ -314,8 +314,8 @@ async def display_action_to_code(config, action_id, template_arg, args):
 
 
 # Регистрация событий включения и отключения пищалки кондиционера
-@automation.register_action("climate.tclac.beeper_on", BeeperOnAction, cv.Schema)
-@automation.register_action("climate.tclac.beeper_off", BeeperOffAction, cv.Schema)
+@automation.register_action("tclac.beeper_on", BeeperOnAction, cv.Schema)
+@automation.register_action("tclac.beeper_off", BeeperOffAction, cv.Schema)
 async def beeper_action_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
@@ -323,8 +323,8 @@ async def beeper_action_to_code(config, action_id, template_arg, args):
 
 
 # Регистрация событий включения и отключения принудительного применения настроек
-@automation.register_action("climate.tclac.force_mode_on", ForceOnAction, cv.Schema)
-@automation.register_action("climate.tclac.force_mode_off", ForceOffAction, cv.Schema)
+@automation.register_action("tclac.force_mode_on", ForceOnAction, cv.Schema)
+@automation.register_action("tclac.force_mode_off", ForceOffAction, cv.Schema)
 async def force_mode_action_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
@@ -357,7 +357,7 @@ async def tclac_set_vertical_airflow_to_code(config, action_id, template_arg, ar
 
 # Регистрация события установки горизонтальной фиксации заслонок
 @automation.register_action(
-    "climate.tclac.set_horizontal_airflow",
+    "tclac.set_horizontal_airflow",
     HorizontalAirflowAction,
     cv.Schema(
         {
@@ -380,7 +380,7 @@ async def tclac_set_horizontal_airflow_to_code(config, action_id, template_arg, 
 
 # Регистрация события установки вертикального качания шторки
 @automation.register_action(
-    "climate.tclac.set_vertical_swing_direction",
+    "tclac.set_vertical_swing_direction",
     VerticalSwingDirectionAction,
     cv.Schema(
         {
@@ -405,7 +405,7 @@ async def tclac_set_vertical_swing_direction_to_code(
 
 # Регистрация события установки горизонтального качания шторок
 @automation.register_action(
-    "climate.tclac.set_horizontal_swing_direction",
+    "tclac.set_horizontal_swing_direction",
     HorizontalSwingDirectionAction,
     cv.Schema(
         {
