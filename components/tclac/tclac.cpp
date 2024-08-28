@@ -77,7 +77,7 @@ void TclClimate::loop() {
 
     uint8_t check = getChecksum(dataRX, sizeof(dataRX));
 
-    ESP_LOGD(TAG, "RX: %s", format_hex_pretty(dataRX, sizeof(dataRX)));
+    ESP_LOGD(TAG, "RX: %s", format_hex_pretty(dataRX, sizeof(dataRX)).c_str());
 
     // Проверяем контрольную сумму
     if (check != dataRX[60]) {
