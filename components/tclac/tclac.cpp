@@ -11,6 +11,8 @@
 namespace esphome {
 namespace tclac {
 
+const char *const TAG = "tclac";
+
 const uint8_t TclClimate::poll[8] = {0xBB, 0x00, 0x01, 0x04, 0x02, 0x01, 0x00, 0xBD};
 
 ClimateTraits TclClimate::traits() {
@@ -75,9 +77,7 @@ void TclClimate::loop() {
 
     uint8_t check = getChecksum(dataRX, sizeof(dataRX));
 
-    // raw = getHex(dataRX, sizeof(dataRX));
-
-    // ESP_LOGD("TCL", "RX full : %s ", raw.c_str());
+    ESP_LOGD(TAG, "RX: %s", format_hex_pretty(dataRX, sizeof(dataRX)));
 
     // Проверяем контрольную сумму
     if (check != dataRX[60]) {
