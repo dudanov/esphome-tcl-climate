@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome import automation, pins
+from esphome import automation
 from esphome.components import climate, uart
 from esphome.components.climate import (
     CONF_CURRENT_TEMPERATURE,
@@ -20,9 +20,17 @@ from esphome.const import (
     CONF_TARGET_TEMPERATURE,
     CONF_TEMPERATURE_STEP,
     CONF_VISUAL,
+    ENTITY_CATEGORY_CONFIG,
 )
+from esphome.components.switch import (
+    Switch,
+    new_switch,
+    switch_schema,
+)
+from esphome.cpp_helpers import register_parented
 
-AUTO_LOAD = ["climate"]
+NAME = "tclac"
+AUTO_LOAD = ["climate", "switch"]
 CODEOWNERS = ["@I-am-nightingale", "@xaxexa", "@junkfix"]
 DEPENDENCIES = ["climate", "uart"]
 
@@ -31,6 +39,7 @@ TCLAC_MAX_TEMPERATURE = 31.0
 TCLAC_TARGET_TEMPERATURE_STEP = 1.0
 TCLAC_CURRENT_TEMPERATURE_STEP = 1.0
 
+CONF_TCL_ID = "tcl_id"
 CONF_DISPLAY = "show_display"
 CONF_FORCE_MODE = "force_mode"
 CONF_VERTICAL_AIRFLOW = "vertical_airflow"
@@ -38,10 +47,38 @@ CONF_HORIZONTAL_AIRFLOW = "horizontal_airflow"
 CONF_VERTICAL_SWING_MODE = "vertical_swing_mode"
 CONF_HORIZONTAL_SWING_MODE = "horizontal_swing_mode"
 
-tclac_ns = cg.esphome_ns.namespace("tclac")
+
+def register_tcl(var, config):
+    return register_parented(var, config[CONF_TCL_ID])
+
+
+def tcl_parented_schema(class_):
+    return cv.Schema(
+        {
+            cv.GenerateID(CONF_TCL_ID): cv.use_id(class_),
+        }
+    )
+
+
+tclac_ns = cg.esphome_ns.namespace(NAME)
 TclClimate = tclac_ns.class_(
     "TclClimate", uart.UARTDevice, climate.Climate, cg.PollingComponent
 )
+
+
+BeeperSwitch = tclac_ns.class_("BeeperSwitch", Switch)
+BEEPER_SWITCH_SCHEMA = switch_schema(
+    BeeperSwitch,
+    entity_category=ENTITY_CATEGORY_CONFIG,
+    icon="mdi:volume-source",
+    default_restore_mode="RESTORE_DEFAULT_ON",
+).extend(tcl_parented_schema(TclClimate))
+
+
+async def new_tcl_switch(config):
+    var = await new_switch(config)
+    await register_tcl(var, config)
+
 
 SUPPORTED_FAN_MODES_OPTIONS = {
     "AUTO": ClimateMode.CLIMATE_FAN_AUTO,  # Доступен всегда
@@ -163,7 +200,7 @@ CONFIG_SCHEMA = cv.All(
     climate.CLIMATE_SCHEMA.extend(
         {
             cv.GenerateID(): cv.declare_id(TclClimate),
-            cv.Optional(CONF_BEEPER, default=True): cv.boolean,
+            cv.Optional(CONF_BEEPER): BEEPER_SWITCH_SCHEMA,
             cv.Optional(CONF_DISPLAY, default=True): cv.boolean,
             cv.Optional(CONF_FORCE_MODE, default=True): cv.boolean,
             cv.Optional(CONF_VERTICAL_AIRFLOW, default="CENTER"): cv.ensure_list(
@@ -222,7 +259,17 @@ CONFIG_SCHEMA = cv.All(
             ): cv.ensure_list(cv.enum(SUPPORTED_FAN_MODES_OPTIONS, upper=True)),
         }
     )
-    .extend(uart.UART_DEVICE_SCHEMA)
+    .extend(
+        uart.final_validate_device_schema(
+            name=NAME,
+            baud_rate=9600,
+            require_rx=True,
+            require_tx=True,
+            data_bits=8,
+            parity="EVEN",
+            stop_bits=1,
+        )
+    )
     .extend(cv.COMPONENT_SCHEMA),
     validate_visual,
 )
@@ -373,14 +420,14 @@ async def tclac_set_horizontal_swing_direction_to_code(
 
 
 # Добавление конфигурации в код
-def to_code(config):
+async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     yield cg.register_component(var, config)
     yield uart.register_uart_device(var, config)
     yield climate.register_climate(var, config)
 
     if CONF_BEEPER in config:
-        cg.add(var.set_beeper_state(config[CONF_BEEPER]))
+        await new_tcl_switch(config[CONF_BEEPER])
     if CONF_DISPLAY in config:
         cg.add(var.set_display_state(config[CONF_DISPLAY]))
     if CONF_FORCE_MODE in config:

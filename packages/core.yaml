@@ -122,23 +122,6 @@ logger:
 # Раздел настроек устройства:
 # - Переключатели
 switch:
-  # Пищалка для подтверждения команд, по умолчанию выключена
-  - name: Beeper
-    platform: template
-    device_class: switch
-    id: beep_mode
-    entity_category: config
-    restore_mode: RESTORE_DEFAULT_ON
-    optimistic: true
-    on_turn_on:
-      then:
-        lambda: !lambda |-
-          id(${device_name}climate).set_beeper_state(true);
-    on_turn_off:
-      then:
-        lambda: !lambda |-
-          id(${device_name}climate).set_beeper_state(false);
-
   # Индикатор уставки температуры на корпусе внутреннего блока, по умолчанию включен
   - name: Display
     platform: template
@@ -287,3 +270,7 @@ climate:
   - platform: tclac
     name: "${device_name} Climate"
     id: ${device_name}climate
+  # Пищалка для подтверждения команд, по умолчанию выключена
+    beeper:
+      - name: Beeper
+        id: beep_mode
