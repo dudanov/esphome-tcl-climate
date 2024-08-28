@@ -255,9 +255,9 @@ climate:
     id: ${device_name}
     # Пищалка для подтверждения команд, по умолчанию выключена
     beeper:
-      name: ${device_name} Beeper
+      name: Beeper
       id: beep_mode
     # Индикатор уставки температуры на корпусе внутреннего блока, по умолчанию включен
     display:
-      name: ${device_name} Display
+      name: Display
       id: display_mode
