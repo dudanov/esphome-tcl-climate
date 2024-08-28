@@ -94,8 +94,8 @@ void TclClimate::update() {
 }
 
 void TclClimate::readData() {
-  current_temperature = float((((dataRX[17] << 8) | dataRX[18]) / 374 - 32) / 1.8);
-  target_temperature = (dataRX[FAN_SPEED_POS] & SET_TEMP_MASK) + 16;
+  this->current_temperature = fahrenheit_to_celsius(encode_uint16(dataRX[17], dataRX[18]) / 374.0f);
+  this->target_temperature = (dataRX[FAN_SPEED_POS] & SET_TEMP_MASK) + 16;
 
   // ESP_LOGD("TCL", "TEMP: %f ", current_temperature);
 
