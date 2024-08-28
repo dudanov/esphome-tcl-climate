@@ -304,6 +304,16 @@ TCLAC_ACTION_BASE_SCHEMA = automation.maybe_simple_id(
 )
 
 
+def tcl_templated_schema(conf, validator):
+    return automation.maybe_conf(
+        conf,
+        {
+            cv.GenerateID(): cv.use_id(TclClimate),
+            cv.Required(conf): cv.templatable(validator),
+        },
+    )
+
+
 # Регистрация событий включения и отключения дисплея кондиционера
 @automation.register_action("tclac.display_on", DisplayOnAction, cv.Schema)
 @automation.register_action("tclac.display_off", DisplayOffAction, cv.Schema)
@@ -335,14 +345,8 @@ async def force_mode_action_to_code(config, action_id, template_arg, args):
 @automation.register_action(
     "tclac.set_vertical_airflow",
     VerticalAirflowAction,
-    automation.maybe_conf(
-        CONF_VERTICAL_AIRFLOW,
-        {
-            cv.GenerateID(): cv.use_id(TclClimate),
-            cv.Required(CONF_VERTICAL_AIRFLOW): cv.templatable(
-                cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS)
-            ),
-        },
+    tcl_templated_schema(
+        CONF_VERTICAL_AIRFLOW, cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS)
     ),
 )
 async def tclac_set_vertical_airflow_to_code(config, action_id, template_arg, args):
