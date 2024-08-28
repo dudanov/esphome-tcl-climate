@@ -7,10 +7,9 @@
 
 #pragma once
 
-// #include "esphome.h"
+#include "esphome/core/defines.h"
 #include "esphome/components/climate/climate.h"
 #include "esphome/components/uart/uart.h"
-#include "esphome/core/defines.h"
 
 namespace esphome {
 namespace tclac {
@@ -53,20 +52,20 @@ using climate::ClimatePreset;
 using climate::ClimateSwingMode;
 using climate::ClimateTraits;
 
-enum VerticalSwingDirection : uint8_t {
+enum class VerticalSwingDirection : uint8_t {
   UP_DOWN,
   UPSIDE,
   DOWNSIDE,
 };
 
-enum HorizontalSwingDirection : uint8_t {
+enum class HorizontalSwingDirection : uint8_t {
   LEFT_RIGHT,
   LEFTSIDE,
   CENTER,
   RIGHTSIDE,
 };
 
-enum AirflowVerticalDirection : uint8_t {
+enum class AirflowVerticalDirection : uint8_t {
   LAST,
   MAX_UP,
   UP,
@@ -75,7 +74,7 @@ enum AirflowVerticalDirection : uint8_t {
   MAX_DOWN,
 };
 
-enum AirflowHorizontalDirection : uint8_t {
+enum class AirflowHorizontalDirection : uint8_t {
   LAST,
   MAX_LEFT,
   LEFT,
