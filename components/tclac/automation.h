@@ -52,16 +52,6 @@ template<typename... Ts> class BeeperOffAction : public TclActionBase<Ts...> {
   void play(Ts... x) { this->parent_->set_beeper_state(false); }
 };
 
-// Шаблон действия: включение индикатора модуля
-template<typename... Ts> class ModuleDisplayOnAction : public TclActionBase<Ts...> {
-  void play(Ts... x) { this->parent_->set_module_display_state(true); }
-};
-
-// Шаблон действия: выключение индикатора модуля
-template<typename... Ts> class ModuleDisplayOffAction : public TclActionBase<Ts...> {
-  void play(Ts... x) { this->parent_->set_module_display_state(false); }
-};
-
 // Шаблон действия: включение принудительного применения настроек
 template<typename... Ts> class ForceOnAction : public TclActionBase<Ts...> {
   void play(Ts... x) { this->parent_->set_force_mode_state(true); }

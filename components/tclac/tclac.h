@@ -99,7 +99,6 @@ class TclClimate : public climate::Climate, public esphome::uart::UARTDevice, pu
   void set_display_state(bool state);
   void set_force_mode_state(bool state);
   void sendData(uint8_t *message, uint8_t size);
-  void set_module_display_state(bool state);
   void control(const ClimateCall &call) override;
   static uint8_t getChecksum(const uint8_t *msg, size_t size);
   void set_vertical_airflow(AirflowVerticalDirection direction);
@@ -137,7 +136,6 @@ class TclClimate : public climate::Climate, public esphome::uart::UARTDevice, pu
   bool display_status_;
   bool force_mode_status_;
   uint8_t switch_preset = 0;
-  bool module_display_status_;
   uint8_t switch_fan_mode = 0;
   bool is_call_control = false;
   uint8_t switch_swing_mode = 0;

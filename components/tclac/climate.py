@@ -34,7 +34,6 @@ TCLAC_CURRENT_TEMPERATURE_STEP = 1.0
 CONF_DISPLAY = "show_display"
 CONF_FORCE_MODE = "force_mode"
 CONF_VERTICAL_AIRFLOW = "vertical_airflow"
-CONF_MODULE_DISPLAY = "show_module_display"
 CONF_HORIZONTAL_AIRFLOW = "horizontal_airflow"
 CONF_VERTICAL_SWING_MODE = "vertical_swing_mode"
 CONF_HORIZONTAL_SWING_MODE = "horizontal_swing_mode"
@@ -167,7 +166,6 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_BEEPER, default=True): cv.boolean,
             cv.Optional(CONF_DISPLAY, default=True): cv.boolean,
             cv.Optional(CONF_FORCE_MODE, default=True): cv.boolean,
-            cv.Optional(CONF_MODULE_DISPLAY, default=True): cv.boolean,
             cv.Optional(CONF_VERTICAL_AIRFLOW, default="CENTER"): cv.ensure_list(
                 cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)
             ),
@@ -235,9 +233,7 @@ BeeperOnAction = tclac_ns.class_("BeeperOnAction", automation.Action)
 BeeperOffAction = tclac_ns.class_("BeeperOffAction", automation.Action)
 DisplayOnAction = tclac_ns.class_("DisplayOnAction", automation.Action)
 DisplayOffAction = tclac_ns.class_("DisplayOffAction", automation.Action)
-ModuleDisplayOnAction = tclac_ns.class_("ModuleDisplayOnAction", automation.Action)
 VerticalAirflowAction = tclac_ns.class_("VerticalAirflowAction", automation.Action)
-ModuleDisplayOffAction = tclac_ns.class_("ModuleDisplayOffAction", automation.Action)
 HorizontalAirflowAction = tclac_ns.class_("HorizontalAirflowAction", automation.Action)
 VerticalSwingDirectionAction = tclac_ns.class_(
     "VerticalSwingDirectionAction", automation.Action
@@ -266,19 +262,6 @@ async def display_action_to_code(config, action_id, template_arg, args):
 @automation.register_action("climate.tclac.beeper_on", BeeperOnAction, cv.Schema)
 @automation.register_action("climate.tclac.beeper_off", BeeperOffAction, cv.Schema)
 async def beeper_action_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
-    return var
-
-
-# Регистрация событий включения и отключения светодиодов связи модуля
-@automation.register_action(
-    "climate.tclac.module_display_on", ModuleDisplayOnAction, cv.Schema
-)
-@automation.register_action(
-    "climate.tclac.module_display_off", ModuleDisplayOffAction, cv.Schema
-)
-async def module_display_action_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
     return var
@@ -406,8 +389,6 @@ def to_code(config):
         cg.add(var.set_supported_modes(config[CONF_SUPPORTED_MODES]))
     if CONF_SUPPORTED_PRESETS in config:
         cg.add(var.set_supported_presets(config[CONF_SUPPORTED_PRESETS]))
-    if CONF_MODULE_DISPLAY in config:
-        cg.add(var.set_module_display_state(config[CONF_MODULE_DISPLAY]))
     if CONF_SUPPORTED_FAN_MODES in config:
         cg.add(var.set_supported_fan_modes(config[CONF_SUPPORTED_FAN_MODES]))
     if CONF_SUPPORTED_SWING_MODES in config:

@@ -525,7 +525,6 @@ void TclClimate::takeControl() {
   dataTX[34] = 0x00;  //??
   dataTX[35] = 0x00;  //??
   dataTX[36] = 0x00;  //??
-  dataTX[37] = 0xFF;  // Контрольная сумма
   dataTX[37] = TclClimate::getChecksum(dataTX, sizeof(dataTX) - 1);
 
   TclClimate::sendData(dataTX, sizeof(dataTX));
@@ -574,16 +573,6 @@ void TclClimate::set_display_state(bool state) {
 }
 // Получение состояния режима принудительного применения настроек
 void TclClimate::set_force_mode_state(bool state) { this->force_mode_status_ = state; }
-// Получение пина светодиода приема данных
-#ifdef CONF_RX_LED
-void TclClimate::set_rx_led_pin(GPIOPin *rx_led_pin) { this->rx_led_pin_ = rx_led_pin; }
-#endif
-// Получение пина светодиода передачи данных
-#ifdef CONF_TX_LED
-void TclClimate::set_tx_led_pin(GPIOPin *tx_led_pin) { this->tx_led_pin_ = tx_led_pin; }
-#endif
-// Получение состояния светодиодов связи модуля
-void TclClimate::set_module_display_state(bool state) { this->module_display_status_ = state; }
 // Получение режима фиксации вертикальной заслонки
 void TclClimate::set_vertical_airflow(AirflowVerticalDirection direction) {
   this->vertical_direction_ = direction;
