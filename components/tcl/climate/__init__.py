@@ -25,7 +25,7 @@ from esphome.const import (
 
 from .. import TclBase, tcl_ns, CONF_FORCE, CONF_TCL_ID, DOMAIN
 
-AUTO_LOAD = ["climate", "switch"]
+AUTO_LOAD = ["tcl", "climate"]
 CODEOWNERS = ["@I-am-nightingale", "@xaxexa", "@junkfix"]
 DEPENDENCIES = ["climate", "uart"]
 
