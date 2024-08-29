@@ -1,11 +1,10 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components.switch import Switch, new_switch, switch_schema
-from esphome.const import CONF_BEEPER, CONF_DISPLAY, ENTITY_CATEGORY_CONFIG, CONF_NAME
 from esphome import automation
+from esphome.components.switch import Switch, new_switch, switch_schema
+from esphome.const import CONF_BEEPER, CONF_DISPLAY, CONF_NAME, ENTITY_CATEGORY_CONFIG
 
-from .. import CONF_TCL_ID, TclBase, register_tcl, tcl_ns, CONF_FORCE
-
+from .. import CONF_FORCE, CONF_TCL_ID, TclBase, register_tcl, tcl_ns
 
 BaseSwitch = tcl_ns.class_("BaseSwitch", Switch, cg.Parented)
 BeeperSwitch = tcl_ns.class_("BeeperSwitch", BaseSwitch)

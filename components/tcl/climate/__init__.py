@@ -23,7 +23,7 @@ from esphome.const import (
     CONF_VISUAL,
 )
 
-from .. import TclBase, tcl_ns, CONF_FORCE, CONF_TCL_ID, DOMAIN
+from .. import CONF_FORCE, CONF_TCL_ID, DOMAIN, TclBase, tcl_ns
 
 AUTO_LOAD = ["tcl", "climate"]
 CODEOWNERS = ["@I-am-nightingale", "@xaxexa", "@junkfix"]
