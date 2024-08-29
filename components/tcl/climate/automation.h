@@ -3,30 +3,8 @@
 #include "tcl_climate.h"
 #include "esphome/core/automation.h"
 
-#ifdef USE_SWITCH
-#include "esphome/components/switch/switch.h"
-#endif
-
 namespace esphome {
 namespace tcl {
-
-#ifdef USE_SWITCH
-class BaseSwitch : public switch_::Switch, public Parented<TclClimate> {};
-
-class BeeperSwitch : public BaseSwitch {
-  void write_state(bool state) override {
-    this->parent_->set_beeper_state(state);
-    this->publish_state(state);
-  }
-};
-
-class DisplaySwitch : public BaseSwitch {
-  void write_state(bool state) override {
-    this->parent_->set_display_state(state);
-    this->publish_state(state);
-  }
-};
-#endif
 
 template<typename... Ts> class BaseAction : public Action<Ts...>, public Parented<TclClimate> {};
 
