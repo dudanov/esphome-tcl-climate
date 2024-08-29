@@ -13,7 +13,7 @@ DisplaySwitch = tcl_ns.class_("DisplaySwitch", BaseSwitch)
 ForceSwitch = tcl_ns.class_("ForceSwitch", BaseSwitch)
 
 
-SWITCH_TYPES = {
+_SCHEMAS = {
     CONF_BEEPER: automation.maybe_conf(
         CONF_NAME,
         switch_schema(
@@ -47,11 +47,11 @@ CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_TCL_ID): cv.use_id(TclBase),
     }
-).extend({cv.Optional(k): v for k, v in SWITCH_TYPES.items()})
+).extend({cv.Optional(k): v for k, v in _SCHEMAS.items()})
 
 
 async def to_code(config):
-    for option in SWITCH_TYPES:
+    for option in _SCHEMAS:
         if conf := config.get(option):
             var = await new_switch(conf)
             await register_tcl(var, config)
