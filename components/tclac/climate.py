@@ -318,8 +318,8 @@ def tcl_templated_schema(conf, validator):
 @automation.register_action("tclac.display_on", DisplayOnAction, TCLAC_ACTION_BASE_SCHEMA)
 @automation.register_action("tclac.display_off", DisplayOffAction, TCLAC_ACTION_BASE_SCHEMA)
 async def display_action_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
+    var = cg.new_Pvariable(action_id, template_arg)
+    await cg.register_parented(var, config[CONF_ID])
     return var
 
 
