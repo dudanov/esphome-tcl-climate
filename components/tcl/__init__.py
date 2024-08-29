@@ -3,7 +3,6 @@ import esphome.config_validation as cv
 from esphome.components import uart
 from esphome.cpp_helpers import register_parented
 
-AUTO_LOAD = ["climate", "switch"]
 DOMAIN = "tcl"
 CONF_TCL_ID = "tcl_id"
 CONF_FORCE = "force"

@@ -20,15 +20,6 @@ esphome:
     priority: -100
     then:
       lambda: !lambda |-
-        id(${device_name}).set_beeper_state(false);
-        id(${device_name}).set_force_mode_state(false);
-
-        if (id(display_mode).state){
-          id(${device_name}).set_display_state(true);
-        } else {
-          id(${device_name}).set_display_state(false);
-        }
-
         if (id(vswing).active_index() == 0){
           id(${device_name}).set_vertical_swing_direction(esphome::tcl::VerticalSwingDirection::UP_DOWN);
         } else if (id(vswing).active_index() == 1){
@@ -73,16 +64,6 @@ esphome:
           id(${device_name}).set_horizontal_airflow(esphome::tcl::AirflowHorizontalDirection::RIGHT);
         } else if (id(hfixing).active_index() == 5){
           id(${device_name}).set_horizontal_airflow(esphome::tcl::AirflowHorizontalDirection::MAX_RIGHT);
-        }
-        if (id(beep_mode).state){
-          id(${device_name}).set_beeper_state(true);
-        } else {
-          id(${device_name}).set_beeper_state(false);
-        }
-        if (id(force_mode).state){
-          id(${device_name}).set_force_mode_state(true);
-        } else {
-          id(${device_name}).set_force_mode_state(false);
         }
 
 uart:
