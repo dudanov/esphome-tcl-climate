@@ -314,21 +314,21 @@ def tcl_templated_schema(conf, validator):
     )
 
 
+# Регистрация событий включения и отключения пищалки кондиционера
+@automation.register_action("tclac.beeper_on", BeeperOnAction, TCLAC_ACTION_BASE_SCHEMA)
+@automation.register_action(
+    "tclac.beeper_off", BeeperOffAction, TCLAC_ACTION_BASE_SCHEMA
+)
 # Регистрация событий включения и отключения дисплея кондиционера
-@automation.register_action("tclac.display_on", DisplayOnAction, TCLAC_ACTION_BASE_SCHEMA)
-@automation.register_action("tclac.display_off", DisplayOffAction, TCLAC_ACTION_BASE_SCHEMA)
-async def display_action_to_code(config, action_id, template_arg, args):
+@automation.register_action(
+    "tclac.display_on", DisplayOnAction, TCLAC_ACTION_BASE_SCHEMA
+)
+@automation.register_action(
+    "tclac.display_off", DisplayOffAction, TCLAC_ACTION_BASE_SCHEMA
+)
+async def base_actions_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(var, config[CONF_ID])
-    return var
-
-
-# Регистрация событий включения и отключения пищалки кондиционера
-@automation.register_action("tclac.beeper_on", BeeperOnAction, cv.Schema)
-@automation.register_action("tclac.beeper_off", BeeperOffAction, cv.Schema)
-async def beeper_action_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
     return var
 
 
