@@ -13,22 +13,34 @@ DisplaySwitch = tcl_ns.class_("DisplaySwitch", BaseSwitch)
 ForceSwitch = tcl_ns.class_("ForceSwitch", BaseSwitch)
 
 
-def tcl_simple(_class):
-    return automation.maybe_conf(
+SWITCH_TYPES = {
+    CONF_BEEPER: automation.maybe_conf(
         CONF_NAME,
         switch_schema(
-            _class,
+            BeeperSwitch,
             entity_category=ENTITY_CATEGORY_CONFIG,
             icon="mdi:volume-source",
             default_restore_mode="RESTORE_DEFAULT_ON",
         ),
-    )
-
-
-SWITCH_TYPES = {
-    CONF_BEEPER: tcl_simple(BeeperSwitch),
-    CONF_DISPLAY: tcl_simple(DisplaySwitch),
-    CONF_FORCE: tcl_simple(ForceSwitch),
+    ),
+    CONF_DISPLAY: automation.maybe_conf(
+        CONF_NAME,
+        switch_schema(
+            DisplaySwitch,
+            entity_category=ENTITY_CATEGORY_CONFIG,
+            icon="mdi:volume-source",
+            default_restore_mode="RESTORE_DEFAULT_ON",
+        ),
+    ),
+    CONF_FORCE: automation.maybe_conf(
+        CONF_NAME,
+        switch_schema(
+            ForceSwitch,
+            entity_category=ENTITY_CATEGORY_CONFIG,
+            icon="mdi:volume-source",
+            default_restore_mode="RESTORE_DEFAULT_ON",
+        ),
+    ),
 }
 
 CONFIG_SCHEMA = cv.Schema(
