@@ -9,7 +9,8 @@
 
 #include "esphome/core/defines.h"
 #include "esphome/components/climate/climate.h"
-#include "esphome/components/uart/uart.h"
+
+#include "../tcl_base.h"
 
 namespace esphome {
 namespace tcl {
@@ -83,10 +84,8 @@ enum class AirflowHorizontalDirection : uint8_t {
   MAX_RIGHT,
 };
 
-class TclClimate : public climate::Climate, public esphome::uart::UARTDevice, public PollingComponent {
+class TclClimate : public TclBase, public climate::Climate {
  public:
-  TclClimate() : PollingComponent(5 * 1000) { checksum = 0; }
-
   /* Polling component methods. */
 
   void loop() override;
@@ -126,15 +125,12 @@ class TclClimate : public climate::Climate, public esphome::uart::UARTDevice, pu
   std::set<ClimateFanMode> supported_fan_modes_{};
   std::set<ClimateSwingMode> supported_swing_modes_{};
 
-  uint8_t checksum;
+  uint8_t checksum{};
   // dataTX с управлением состоит из 38 байт
   uint8_t dataTX[38];
   // А dataRX по прежнему из 61 байта
   uint8_t dataRX[61];
   // Инициализация и начальное наполнение переменных состоянй переключателей
-  bool beeper_status_;
-  bool display_status_;
-  bool force_mode_status_;
   uint8_t switch_preset = 0;
   uint8_t switch_fan_mode = 0;
   bool is_call_control = false;

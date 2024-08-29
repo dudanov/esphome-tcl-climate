@@ -10,6 +10,7 @@ from esphome.components.climate import (
 )
 from esphome.const import (
     CONF_BEEPER,
+    CONF_DISPLAY,
     CONF_ID,
     CONF_MAX_TEMPERATURE,
     CONF_MIN_TEMPERATURE,
@@ -20,16 +21,10 @@ from esphome.const import (
     CONF_TARGET_TEMPERATURE,
     CONF_TEMPERATURE_STEP,
     CONF_VISUAL,
-    ENTITY_CATEGORY_CONFIG,
 )
-from esphome.components.switch import (
-    Switch,
-    new_switch,
-    switch_schema,
-)
-from esphome.cpp_helpers import register_parented
 
-NAME = "tcl"
+from .. import TclBase, tcl_ns, CONF_FORCE, CONF_TCL_ID
+
 AUTO_LOAD = ["climate", "switch"]
 CODEOWNERS = ["@I-am-nightingale", "@xaxexa", "@junkfix"]
 DEPENDENCIES = ["climate", "uart"]
@@ -39,53 +34,13 @@ TCLAC_MAX_TEMPERATURE = 31.0
 TCLAC_TARGET_TEMPERATURE_STEP = 1.0
 TCLAC_CURRENT_TEMPERATURE_STEP = 1.0
 
-CONF_TCL_ID = "tcl_id"
-CONF_DISPLAY = "display"
-CONF_FORCE_MODE = "force_mode"
 CONF_VERTICAL_AIRFLOW = "vertical_airflow"
 CONF_HORIZONTAL_AIRFLOW = "horizontal_airflow"
 CONF_VERTICAL_SWING_MODE = "vertical_swing_mode"
 CONF_HORIZONTAL_SWING_MODE = "horizontal_swing_mode"
 
 
-def register_tcl(var, config):
-    return register_parented(var, config[CONF_TCL_ID])
-
-
-def tcl_parented_schema(class_):
-    return cv.Schema(
-        {
-            cv.GenerateID(CONF_TCL_ID): cv.use_id(class_),
-        }
-    )
-
-
-tcl_ns = cg.esphome_ns.namespace(NAME)
-TclClimate = tcl_ns.class_(
-    "TclClimate", uart.UARTDevice, climate.Climate, cg.PollingComponent
-)
-
-
-BeeperSwitch = tcl_ns.class_("BeeperSwitch", Switch)
-BEEPER_SWITCH_SCHEMA = switch_schema(
-    BeeperSwitch,
-    entity_category=ENTITY_CATEGORY_CONFIG,
-    icon="mdi:volume-source",
-    default_restore_mode="RESTORE_DEFAULT_ON",
-).extend(tcl_parented_schema(TclClimate))
-
-DisplaySwitch = tcl_ns.class_("DisplaySwitch", Switch)
-DISPLAY_SWITCH_SCHEMA = switch_schema(
-    DisplaySwitch,
-    entity_category=ENTITY_CATEGORY_CONFIG,
-    icon="mdi:volume-source",
-    default_restore_mode="RESTORE_DEFAULT_ON",
-).extend(tcl_parented_schema(TclClimate))
-
-
-async def new_tcl_switch(config):
-    var = await new_switch(config)
-    await register_tcl(var, config)
+TclClimate = tcl_ns.class_("TclClimate", TclBase, climate.Climate)
 
 
 SUPPORTED_FAN_MODES_OPTIONS = {
@@ -208,9 +163,9 @@ CONFIG_SCHEMA = cv.All(
     climate.CLIMATE_SCHEMA.extend(
         {
             cv.GenerateID(): cv.declare_id(TclClimate),
-            cv.Optional(CONF_BEEPER): BEEPER_SWITCH_SCHEMA,
-            cv.Optional(CONF_DISPLAY): DISPLAY_SWITCH_SCHEMA,
-            cv.Optional(CONF_FORCE_MODE, default=True): cv.boolean,
+            cv.Optional(CONF_BEEPER): cv.boolean,
+            cv.Optional(CONF_DISPLAY): cv.boolean,
+            cv.Optional(CONF_FORCE): cv.boolean,
             cv.Optional(CONF_VERTICAL_AIRFLOW, default="CENTER"): cv.ensure_list(
                 cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)
             ),
@@ -429,11 +384,11 @@ async def to_code(config):
     await climate.register_climate(var, config)
 
     if CONF_BEEPER in config:
-        await new_tcl_switch(config[CONF_BEEPER])
+        cg.add(var.set_beeper_state(config[CONF_BEEPER]))
     if CONF_DISPLAY in config:
-        await new_tcl_switch(config[CONF_DISPLAY])
-    if CONF_FORCE_MODE in config:
-        cg.add(var.set_force_mode_state(config[CONF_FORCE_MODE]))
+        cg.add(var.set_display_state(config[CONF_DISPLAY]))
+    if CONF_FORCE in config:
+        cg.add(var.set_force_state(config[CONF_FORCE]))
     if CONF_SUPPORTED_MODES in config:
         cg.add(var.set_supported_modes(config[CONF_SUPPORTED_MODES]))
     if CONF_SUPPORTED_PRESETS in config:

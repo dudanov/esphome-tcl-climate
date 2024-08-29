@@ -120,24 +120,6 @@ logger:
   baud_rate: 0
 
 # Раздел настроек устройства:
-# - Переключатели
-switch:
-  - name: Force config
-    platform: template
-    device_class: switch
-    id: force_mode
-    entity_category: config
-    restore_mode: RESTORE_DEFAULT_ON
-    optimistic: true
-    on_turn_on:
-      then:
-        lambda: !lambda |-
-          id(${device_name}).set_force_mode_state(true);
-    on_turn_off:
-      then:
-        lambda: !lambda |-
-          id(${device_name}).set_force_mode_state(false);
-
 # - Выпадающие списки
 select:
   # Настройка вертикального качания
@@ -255,10 +237,6 @@ climate:
     name: None
     id: ${device_name}
     # Пищалка для подтверждения команд, по умолчанию выключена
-    beeper:
-      name: Beeper
-      id: beep_mode
+    beeper: true
     # Индикатор уставки температуры на корпусе внутреннего блока, по умолчанию включен
-    display:
-      name: Display
-      id: display_mode
+    display: true
