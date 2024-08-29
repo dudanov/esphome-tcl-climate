@@ -23,7 +23,7 @@ from esphome.const import (
     CONF_VISUAL,
 )
 
-from .. import TclBase, tcl_ns, CONF_FORCE, CONF_TCL_ID
+from .. import TclBase, tcl_ns, CONF_FORCE, CONF_TCL_ID, DOMAIN
 
 AUTO_LOAD = ["climate", "switch"]
 CODEOWNERS = ["@I-am-nightingale", "@xaxexa", "@junkfix"]
@@ -228,7 +228,7 @@ CONFIG_SCHEMA = cv.All(
 )
 
 FINAL_VALIDATE_SCHEMA = uart.final_validate_device_schema(
-    name=NAME,
+    name=DOMAIN,
     baud_rate=9600,
     require_rx=True,
     require_tx=True,
