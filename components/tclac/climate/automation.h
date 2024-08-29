@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "tclac.h"
+#include "tcl_climate.h"
 #include "esphome/core/automation.h"
 
 #ifdef USE_SWITCH
@@ -8,7 +8,7 @@
 #endif
 
 namespace esphome {
-namespace tclac {
+namespace tcl {
 
 #ifdef USE_SWITCH
 class BaseSwitch : public switch_::Switch, public Parented<TclClimate> {};
@@ -84,5 +84,5 @@ template<typename... Ts> class ForceOffAction : public BaseAction<Ts...> {
   void play(Ts... x) { this->parent_->set_force_mode_state(false); }
 };
 
-}  // namespace tclac
+}  // namespace tcl
 }  // namespace esphome

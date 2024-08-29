@@ -29,7 +29,7 @@ from esphome.components.switch import (
 )
 from esphome.cpp_helpers import register_parented
 
-NAME = "tclac"
+NAME = "tcl"
 AUTO_LOAD = ["climate", "switch"]
 CODEOWNERS = ["@I-am-nightingale", "@xaxexa", "@junkfix"]
 DEPENDENCIES = ["climate", "uart"]
@@ -60,13 +60,13 @@ def tcl_parented_schema(class_):
     )
 
 
-tclac_ns = cg.esphome_ns.namespace(NAME)
-TclClimate = tclac_ns.class_(
+tcl_ns = cg.esphome_ns.namespace(NAME)
+TclClimate = tcl_ns.class_(
     "TclClimate", uart.UARTDevice, climate.Climate, cg.PollingComponent
 )
 
 
-BeeperSwitch = tclac_ns.class_("BeeperSwitch", Switch)
+BeeperSwitch = tcl_ns.class_("BeeperSwitch", Switch)
 BEEPER_SWITCH_SCHEMA = switch_schema(
     BeeperSwitch,
     entity_category=ENTITY_CATEGORY_CONFIG,
@@ -74,7 +74,7 @@ BEEPER_SWITCH_SCHEMA = switch_schema(
     default_restore_mode="RESTORE_DEFAULT_ON",
 ).extend(tcl_parented_schema(TclClimate))
 
-DisplaySwitch = tclac_ns.class_("DisplaySwitch", Switch)
+DisplaySwitch = tcl_ns.class_("DisplaySwitch", Switch)
 DISPLAY_SWITCH_SCHEMA = switch_schema(
     DisplaySwitch,
     entity_category=ENTITY_CATEGORY_CONFIG,
@@ -122,14 +122,14 @@ SUPPORTED_CLIMATE_PRESETS_OPTIONS = {
     "COMFORT": ClimatePreset.CLIMATE_PRESET_COMFORT,
 }
 
-VerticalSwingDirection = tclac_ns.enum("VerticalSwingDirection", True)
+VerticalSwingDirection = tcl_ns.enum("VerticalSwingDirection", True)
 VERTICAL_SWING_DIRECTION_OPTIONS = {
     "UP_DOWN": VerticalSwingDirection.UPDOWN,
     "UPSIDE": VerticalSwingDirection.UPSIDE,
     "DOWNSIDE": VerticalSwingDirection.DOWNSIDE,
 }
 
-HorizontalSwingDirection = tclac_ns.enum("HorizontalSwingDirection", True)
+HorizontalSwingDirection = tcl_ns.enum("HorizontalSwingDirection", True)
 HORIZONTAL_SWING_DIRECTION_OPTIONS = {
     "LEFT_RIGHT": HorizontalSwingDirection.LEFT_RIGHT,
     "LEFTSIDE": HorizontalSwingDirection.LEFTSIDE,
@@ -137,7 +137,7 @@ HORIZONTAL_SWING_DIRECTION_OPTIONS = {
     "RIGHTSIDE": HorizontalSwingDirection.RIGHTSIDE,
 }
 
-AirflowVerticalDirection = tclac_ns.enum("AirflowVerticalDirection")
+AirflowVerticalDirection = tcl_ns.enum("AirflowVerticalDirection")
 AIRFLOW_VERTICAL_DIRECTION_OPTIONS = {
     "LAST": AirflowVerticalDirection.LAST,
     "MAX_UP": AirflowVerticalDirection.MAX_UP,
@@ -147,7 +147,7 @@ AIRFLOW_VERTICAL_DIRECTION_OPTIONS = {
     "MAX_DOWN": AirflowVerticalDirection.MAX_DOWN,
 }
 
-AirflowHorizontalDirection = tclac_ns.enum("AirflowHorizontalDirection", True)
+AirflowHorizontalDirection = tcl_ns.enum("AirflowHorizontalDirection", True)
 AIRFLOW_HORIZONTAL_DIRECTION_OPTIONS = {
     "LAST": AirflowHorizontalDirection.LAST,
     "MAX_LEFT": AirflowHorizontalDirection.MAX_LEFT,
@@ -282,25 +282,26 @@ FINAL_VALIDATE_SCHEMA = uart.final_validate_device_schema(
     stop_bits=1,
 )
 
-ForceOnAction = tclac_ns.class_("ForceOnAction", automation.Action)
-ForceOffAction = tclac_ns.class_("ForceOffAction", automation.Action)
-BeeperOnAction = tclac_ns.class_("BeeperOnAction", automation.Action)
-BeeperOffAction = tclac_ns.class_("BeeperOffAction", automation.Action)
-DisplayOnAction = tclac_ns.class_("DisplayOnAction", automation.Action)
-DisplayOffAction = tclac_ns.class_("DisplayOffAction", automation.Action)
-VerticalAirflowAction = tclac_ns.class_("VerticalAirflowAction", automation.Action)
-HorizontalAirflowAction = tclac_ns.class_("HorizontalAirflowAction", automation.Action)
-VerticalSwingDirectionAction = tclac_ns.class_(
+ForceOnAction = tcl_ns.class_("ForceOnAction", automation.Action)
+ForceOffAction = tcl_ns.class_("ForceOffAction", automation.Action)
+BeeperOnAction = tcl_ns.class_("BeeperOnAction", automation.Action)
+BeeperOffAction = tcl_ns.class_("BeeperOffAction", automation.Action)
+DisplayOnAction = tcl_ns.class_("DisplayOnAction", automation.Action)
+DisplayOffAction = tcl_ns.class_("DisplayOffAction", automation.Action)
+VerticalAirflowAction = tcl_ns.class_("VerticalAirflowAction", automation.Action)
+HorizontalAirflowAction = tcl_ns.class_("HorizontalAirflowAction", automation.Action)
+VerticalSwingDirectionAction = tcl_ns.class_(
     "VerticalSwingDirectionAction", automation.Action
 )
-HorizontalSwingDirectionAction = tclac_ns.class_(
+HorizontalSwingDirectionAction = tcl_ns.class_(
     "HorizontalSwingDirectionAction", automation.Action
 )
 
-TCLAC_ACTION_BASE_SCHEMA = automation.maybe_simple_id(
+TCL_ACTION_BASE_SCHEMA = automation.maybe_conf(
+    CONF_TCL_ID,
     {
-        cv.GenerateID(CONF_ID): cv.use_id(TclClimate),
-    }
+        cv.GenerateID(CONF_TCL_ID): cv.use_id(TclClimate),
+    },
 )
 
 
@@ -308,42 +309,30 @@ def tcl_templated_schema(conf, validator):
     return automation.maybe_conf(
         conf,
         {
-            cv.GenerateID(): cv.use_id(TclClimate),
+            cv.GenerateID(CONF_TCL_ID): cv.use_id(TclClimate),
             cv.Required(conf): cv.templatable(validator),
         },
     )
 
 
 # Регистрация событий включения и отключения пищалки кондиционера
-@automation.register_action("tclac.beeper_on", BeeperOnAction, TCLAC_ACTION_BASE_SCHEMA)
-@automation.register_action(
-    "tclac.beeper_off", BeeperOffAction, TCLAC_ACTION_BASE_SCHEMA
-)
+@automation.register_action("tcl.beeper_on", BeeperOnAction, TCL_ACTION_BASE_SCHEMA)
+@automation.register_action("tcl.beeper_off", BeeperOffAction, TCL_ACTION_BASE_SCHEMA)
 # Регистрация событий включения и отключения дисплея кондиционера
-@automation.register_action(
-    "tclac.display_on", DisplayOnAction, TCLAC_ACTION_BASE_SCHEMA
-)
-@automation.register_action(
-    "tclac.display_off", DisplayOffAction, TCLAC_ACTION_BASE_SCHEMA
-)
+@automation.register_action("tcl.display_on", DisplayOnAction, TCL_ACTION_BASE_SCHEMA)
+@automation.register_action("tcl.display_off", DisplayOffAction, TCL_ACTION_BASE_SCHEMA)
+# Регистрация событий включения и отключения принудительного применения настроек
+@automation.register_action("tcl.force_on", ForceOnAction, TCL_ACTION_BASE_SCHEMA)
+@automation.register_action("tcl.force_off", ForceOffAction, TCL_ACTION_BASE_SCHEMA)
 async def base_actions_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-    return var
-
-
-# Регистрация событий включения и отключения принудительного применения настроек
-@automation.register_action("tclac.force_mode_on", ForceOnAction, cv.Schema)
-@automation.register_action("tclac.force_mode_off", ForceOffAction, cv.Schema)
-async def force_mode_action_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
+    await cg.register_parented(var, config[CONF_TCL_ID])
     return var
 
 
 # Регистрация события установки вертикальной фиксации заслонки
 @automation.register_action(
-    "tclac.set_vertical_airflow",
+    "tcl.set_vertical_airflow",
     VerticalAirflowAction,
     tcl_templated_schema(
         CONF_VERTICAL_AIRFLOW, cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS)
@@ -351,7 +340,7 @@ async def force_mode_action_to_code(config, action_id, template_arg, args):
 )
 async def tclac_set_vertical_airflow_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
+    await cg.register_parented(var, config[CONF_TCL_ID])
     template_ = await cg.templatable(
         config[CONF_VERTICAL_AIRFLOW], args, AirflowVerticalDirection
     )
@@ -361,7 +350,7 @@ async def tclac_set_vertical_airflow_to_code(config, action_id, template_arg, ar
 
 # Регистрация события установки горизонтальной фиксации заслонок
 @automation.register_action(
-    "tclac.set_horizontal_airflow",
+    "tcl.set_horizontal_airflow",
     HorizontalAirflowAction,
     cv.Schema(
         {
@@ -384,7 +373,7 @@ async def tclac_set_horizontal_airflow_to_code(config, action_id, template_arg, 
 
 # Регистрация события установки вертикального качания шторки
 @automation.register_action(
-    "tclac.set_vertical_swing_direction",
+    "tcl.set_vertical_swing_direction",
     VerticalSwingDirectionAction,
     cv.Schema(
         {
@@ -409,7 +398,7 @@ async def tclac_set_vertical_swing_direction_to_code(
 
 # Регистрация события установки горизонтального качания шторок
 @automation.register_action(
-    "tclac.set_horizontal_swing_direction",
+    "tcl.set_horizontal_swing_direction",
     HorizontalSwingDirectionAction,
     cv.Schema(
         {

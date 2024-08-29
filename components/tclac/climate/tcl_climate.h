@@ -12,7 +12,7 @@
 #include "esphome/components/uart/uart.h"
 
 namespace esphome {
-namespace tclac {
+namespace tcl {
 
 #define SET_TEMP_MASK 0b00001111
 
@@ -145,5 +145,5 @@ class TclClimate : public climate::Climate, public esphome::uart::UARTDevice, pu
 
   esphome::climate::ClimateTraits traits_;
 };
-}  // namespace tclac
+}  // namespace tcl
 }  // namespace esphome

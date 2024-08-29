@@ -5,11 +5,10 @@
  * Соловей с паяльником 15.03.2024
  **/
 
-#include "tclac.h"
-#include "esphome/core/defines.h"
+#include "tcl_climate.h"
 
 namespace esphome {
-namespace tclac {
+namespace tcl {
 
 const char *const TAG = "tclac";
 
@@ -624,5 +623,5 @@ void TclClimate::set_supported_presets(const std::set<climate::ClimatePreset> &p
   this->supported_presets_ = presets;
 }
 
-}  // namespace tclac
+}  // namespace tcl
 }  // namespace esphome
