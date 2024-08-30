@@ -6,7 +6,7 @@
 namespace esphome {
 namespace tcl {
 
-template<typename... Ts> class BaseAction : public Action<Ts...>, public Parented<TclClimate> {};
+template<typename... Ts> class BaseAction : public Action<Ts...>, public Parented<TclBase> {};
 
 // Шаблон действия: включение дисплея
 template<typename... Ts> class DisplayOnAction : public BaseAction<Ts...> {
