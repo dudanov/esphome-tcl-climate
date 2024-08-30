@@ -50,7 +50,7 @@ CONFIG_SCHEMA = cv.Schema(
 
 
 async def to_code(config):
-    tcl = cg.get_variable(config[CONF_TCL_ID])
+    tcl = await cg.get_variable(config[CONF_TCL_ID])
     for option in _SCHEMAS:
         if conf := config.get(option):
             var = await new_switch(conf)
