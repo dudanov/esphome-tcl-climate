@@ -4,7 +4,7 @@ from esphome import automation
 from esphome.components.switch import Switch, new_switch, switch_schema
 from esphome.const import CONF_BEEPER, CONF_DISPLAY, CONF_NAME, ENTITY_CATEGORY_CONFIG
 
-from .. import CONF_FORCE, CONF_TCL_ID, TclBase, register_tcl, tcl_ns
+from .. import CONF_FORCE, CONF_TCL_ID, TclBase, tcl_ns
 
 BaseSwitch = tcl_ns.class_("BaseSwitch", Switch, cg.Parented)
 BeeperSwitch = tcl_ns.class_("BeeperSwitch", BaseSwitch)
@@ -50,7 +50,9 @@ CONFIG_SCHEMA = cv.Schema(
 
 
 async def to_code(config):
+    tcl = cg.get_variable(config[CONF_TCL_ID])
     for option in _SCHEMAS:
         if conf := config.get(option):
             var = await new_switch(conf)
-            await register_tcl(var, config)
+            await cg.register_parented(var, tcl)
+            cg.add(getattr(tcl, f"set_{option}_switch")(var))
