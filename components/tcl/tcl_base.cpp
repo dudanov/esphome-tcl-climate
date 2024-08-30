@@ -14,10 +14,10 @@ const char *const TAG = "tcl";
 
 #define SET_STATE_FUN(name) \
   void TclBase::set_##name##_state(bool state) { \
-    this->##name##_state_ = state; \
+    this->name##_state_ = state; \
     this->takeControl(); \
-    if (this->##name##_switch_ != nullptr) \
-      this->##name##_switch_->publish_state(state); \
+    if (this->name##_switch_ != nullptr) \
+      this->name##_switch_->publish_state(state); \
   }
 
 void TclBase::takeControl() {
