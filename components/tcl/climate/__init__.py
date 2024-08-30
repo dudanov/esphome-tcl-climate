@@ -160,7 +160,7 @@ def validate_visual(config):
 
 # Проверка конфигурации компонента и принятие значений по умолчанию
 CONFIG_SCHEMA = cv.All(
-    TCL_BASE_SCHEMA.extend(climate.CLIMATE_SCHEMA).extend(
+    climate.CLIMATE_SCHEMA.extend(
         {
             cv.GenerateID(): cv.declare_id(TclClimate),
             cv.Optional(CONF_BEEPER): cv.boolean,
@@ -221,7 +221,7 @@ CONFIG_SCHEMA = cv.All(
                 ],
             ): cv.ensure_list(cv.enum(SUPPORTED_FAN_MODES_OPTIONS, upper=True)),
         }
-    ),
+    ).extend(TCL_BASE_SCHEMA),
     validate_visual,
 )
 
