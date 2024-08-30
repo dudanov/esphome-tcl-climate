@@ -30,7 +30,7 @@ ClimateTraits TclClimate::traits() {
   traits.add_supported_mode(climate::CLIMATE_MODE_AUTO);  // Автоматический режим кондиционера тоже
   traits.add_supported_fan_mode(climate::CLIMATE_FAN_AUTO);  // Автоматический режим вентилятора доступен всегда
   traits.add_supported_swing_mode(climate::CLIMATE_SWING_OFF);  // Выключенный режим качания заслонок доступен всегда
-  traits.add_supported_preset(ClimatePreset::CLIMATE_PRESET_NONE);  // На всякий случай без предустановок
+  traits.add_supported_preset(climate::CLIMATE_PRESET_NONE);  // На всякий случай без предустановок
 
   return traits;
 }

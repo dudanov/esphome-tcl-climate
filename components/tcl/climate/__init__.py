@@ -23,7 +23,7 @@ from esphome.const import (
     CONF_VISUAL,
 )
 
-from .. import CONF_FORCE, CONF_TCL_ID, DOMAIN, TclBase, tcl_ns
+from .. import CONF_FORCE, CONF_TCL_ID, TCL_BASE_SCHEMA, TclBase, tcl_ns
 
 AUTO_LOAD = ["tcl", "climate"]
 CODEOWNERS = ["@I-am-nightingale", "@xaxexa", "@junkfix"]
@@ -160,7 +160,7 @@ def validate_visual(config):
 
 # Проверка конфигурации компонента и принятие значений по умолчанию
 CONFIG_SCHEMA = cv.All(
-    climate.CLIMATE_SCHEMA.extend(
+    TCL_BASE_SCHEMA.extend(climate.CLIMATE_SCHEMA).extend(
         {
             cv.GenerateID(): cv.declare_id(TclClimate),
             cv.Optional(CONF_BEEPER): cv.boolean,
@@ -221,20 +221,8 @@ CONFIG_SCHEMA = cv.All(
                 ],
             ): cv.ensure_list(cv.enum(SUPPORTED_FAN_MODES_OPTIONS, upper=True)),
         }
-    )
-    .extend(uart.UART_DEVICE_SCHEMA)
-    .extend(cv.COMPONENT_SCHEMA),
+    ),
     validate_visual,
-)
-
-FINAL_VALIDATE_SCHEMA = uart.final_validate_device_schema(
-    name=DOMAIN,
-    baud_rate=9600,
-    require_rx=True,
-    require_tx=True,
-    data_bits=8,
-    parity="EVEN",
-    stop_bits=1,
 )
 
 VerticalAirflowAction = tcl_ns.class_("VerticalAirflowAction", automation.Action)

@@ -40,6 +40,9 @@ TCL_ACTION_BASE_SCHEMA = automation.maybe_conf(
 )
 
 
+TCL_BASE_SCHEMA = uart.UART_DEVICE_SCHEMA.extend(cv.polling_component_schema("5s"))
+
+
 # Регистрация событий включения и отключения пищалки кондиционера
 @automation.register_action("tcl.beeper_on", BeeperOnAction, TCL_ACTION_BASE_SCHEMA)
 @automation.register_action("tcl.beeper_off", BeeperOffAction, TCL_ACTION_BASE_SCHEMA)
@@ -53,3 +56,14 @@ async def base_actions_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(var, config[CONF_TCL_ID])
     return var
+
+
+FINAL_VALIDATE_SCHEMA = uart.final_validate_device_schema(
+    name=DOMAIN,
+    baud_rate=9600,
+    require_rx=True,
+    require_tx=True,
+    data_bits=8,
+    parity="EVEN",
+    stop_bits=1,
+)
