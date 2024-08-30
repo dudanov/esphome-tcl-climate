@@ -10,7 +10,7 @@
 namespace esphome {
 namespace tcl {
 
-const char *const TAG = "tclac";
+const char *const TAG = "TCL";
 
 const uint8_t TclClimate::poll[8] = {0xBB, 0x00, 0x01, 0x04, 0x02, 0x01, 0x00, 0xBD};
 
@@ -183,7 +183,7 @@ void TclClimate::readData() {
 
   // Публикуем данные
   this->publish_state();
-  allow_take_control = true;
+  allow_take_control_ = true;
 }
 
 // Climate control
@@ -232,11 +232,11 @@ void TclClimate::control(const ClimateCall &call) {
   }
 
   is_call_control = true;
-  takeControl();
-  allow_take_control = true;
+  control_();
+  allow_take_control_ = true;
 }
 
-void TclClimate::takeControl() {
+void TclClimate::control_() {
   dataTX[7] = 0b00000000;
   dataTX[8] = 0b00000000;
   dataTX[9] = 0b00000000;
@@ -256,7 +256,7 @@ void TclClimate::takeControl() {
   }
 
   // Включаем или отключаем пищалку в зависимости от переключателя в настройках
-  if (beeper_status_) {
+  if (beeper_state_) {
     ESP_LOGD(TAG, "Beep mode ON");
     dataTX[7] += 0b00100000;
   } else {
@@ -269,7 +269,7 @@ void TclClimate::takeControl() {
 
   // ВНИМАНИЕ! При выключении дисплея кондиционер сам принудительно переходит в автоматический режим!
 
-  if ((display_status_) && (switch_climate_mode != climate::CLIMATE_MODE_OFF)) {
+  if ((display_state_) && (switch_climate_mode != climate::CLIMATE_MODE_OFF)) {
     ESP_LOGD(TAG, "Dispaly turn ON");
     dataTX[7] += 0b01000000;
   } else {
@@ -527,7 +527,7 @@ void TclClimate::takeControl() {
   dataTX[37] = TclClimate::getChecksum(dataTX, sizeof(dataTX) - 1);
 
   TclClimate::sendData(dataTX, sizeof(dataTX));
-  allow_take_control = false;
+  allow_take_control_ = false;
   is_call_control = false;
 }
 
@@ -552,75 +552,28 @@ uint8_t TclClimate::getChecksum(const uint8_t *msg, size_t size) {
 
 // Действия с данными из конфига
 
-// Получение состояния пищалки
-void TclClimate::set_beeper_state(bool state) {
-  this->beeper_status_ = state;
-  if (force_mode_status_) {
-    if (allow_take_control) {
-      TclClimate::takeControl();
-    }
-  }
-}
-// Получение состояния дисплея кондиционера
-void TclClimate::set_display_state(bool state) {
-  this->display_status_ = state;
-  if (force_mode_status_) {
-    if (allow_take_control) {
-      TclClimate::takeControl();
-    }
-  }
-}
-// Получение состояния режима принудительного применения настроек
-void TclClimate::set_force_mode_state(bool state) { this->force_mode_status_ = state; }
 // Получение режима фиксации вертикальной заслонки
 void TclClimate::set_vertical_airflow(AirflowVerticalDirection direction) {
   this->vertical_direction_ = direction;
-  if (force_mode_status_) {
-    if (allow_take_control) {
-      TclClimate::takeControl();
-    }
-  }
+  this->takeControl();
 }
+
 // Получение режима фиксации горизонтальных заслонок
 void TclClimate::set_horizontal_airflow(AirflowHorizontalDirection direction) {
   this->horizontal_direction_ = direction;
-  if (force_mode_status_) {
-    if (allow_take_control) {
-      TclClimate::takeControl();
-    }
-  }
+  this->takeControl();
 }
+
 // Получение режима качания вертикальной заслонки
 void TclClimate::set_vertical_swing_direction(VerticalSwingDirection direction) {
   this->vertical_swing_direction_ = direction;
-  if (force_mode_status_) {
-    if (allow_take_control) {
-      TclClimate::takeControl();
-    }
-  }
+  this->takeControl();
 }
-// Получение доступных режимов работы кондиционера
-void TclClimate::set_supported_modes(const std::set<climate::ClimateMode> &modes) { this->supported_modes_ = modes; }
+
 // Получение режима качания горизонтальных заслонок
 void TclClimate::set_horizontal_swing_direction(HorizontalSwingDirection direction) {
   horizontal_swing_direction_ = direction;
-  if (force_mode_status_) {
-    if (allow_take_control) {
-      TclClimate::takeControl();
-    }
-  }
-}
-// Получение доступных скоростей вентилятора
-void TclClimate::set_supported_fan_modes(const std::set<climate::ClimateFanMode> &modes) {
-  this->supported_fan_modes_ = modes;
-}
-// Получение доступных режимов качания заслонок
-void TclClimate::set_supported_swing_modes(const std::set<climate::ClimateSwingMode> &modes) {
-  this->supported_swing_modes_ = modes;
-}
-// Получение доступных предустановок
-void TclClimate::set_supported_presets(const std::set<climate::ClimatePreset> &presets) {
-  this->supported_presets_ = presets;
+  this->takeControl();
 }
 
 }  // namespace tcl

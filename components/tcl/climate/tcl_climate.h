@@ -92,22 +92,28 @@ class TclClimate : public TclBase, public climate::Climate {
   void setup() override;
   void update() override;
 
-  void readData();
-  void takeControl();
-  void set_beeper_state(bool state);
-  void set_display_state(bool state);
-  void set_force_mode_state(bool state);
-  void sendData(uint8_t *message, uint8_t size);
   void control(const ClimateCall &call) override;
-  static uint8_t getChecksum(const uint8_t *msg, size_t size);
+
+
   void set_vertical_airflow(AirflowVerticalDirection direction);
+
   void set_horizontal_airflow(AirflowHorizontalDirection direction);
+
   void set_vertical_swing_direction(VerticalSwingDirection direction);
+
   void set_horizontal_swing_direction(HorizontalSwingDirection direction);
+
   void set_supported_presets(const std::set<climate::ClimatePreset> &presets);
-  void set_supported_modes(const std::set<esphome::climate::ClimateMode> &modes);
-  void set_supported_fan_modes(const std::set<esphome::climate::ClimateFanMode> &modes);
-  void set_supported_swing_modes(const std::set<esphome::climate::ClimateSwingMode> &modes);
+
+  void set_supported_modes(std::set<esphome::climate::ClimateMode> modes) { this->supported_modes_ = std::move(modes); }
+
+  void set_supported_fan_modes(std::set<esphome::climate::ClimateFanMode> modes) {
+    this->supported_fan_modes_ = std::move(modes);
+  }
+
+  void set_supported_swing_modes(std::set<esphome::climate::ClimateSwingMode> modes) {
+    this->supported_swing_modes_ = std::move(modes);
+  }
 
  protected:
   // Команда запроса состояния
@@ -137,9 +143,14 @@ class TclClimate : public TclBase, public climate::Climate {
   uint8_t switch_swing_mode = 0;
   int target_temperature_set = 0;
   uint8_t switch_climate_mode = 0;
-  bool allow_take_control = false;
 
   esphome::climate::ClimateTraits traits_;
+
+  void control_() override;
+  void readData();
+  void sendData(uint8_t *message, uint8_t size);
+  static uint8_t getChecksum(const uint8_t *msg, size_t size);
 };
+
 }  // namespace tcl
 }  // namespace esphome
