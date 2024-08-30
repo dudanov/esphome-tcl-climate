@@ -94,7 +94,6 @@ class TclClimate : public TclBase, public climate::Climate {
 
   void control(const ClimateCall &call) override;
 
-
   void set_vertical_airflow(AirflowVerticalDirection direction);
 
   void set_horizontal_airflow(AirflowHorizontalDirection direction);
@@ -103,7 +102,9 @@ class TclClimate : public TclBase, public climate::Climate {
 
   void set_horizontal_swing_direction(HorizontalSwingDirection direction);
 
-  void set_supported_presets(const std::set<climate::ClimatePreset> &presets);
+  void set_supported_presets(std::set<climate::ClimatePreset> presets) {
+    this->supported_presets_ = std::move(presets);
+  }
 
   void set_supported_modes(std::set<esphome::climate::ClimateMode> modes) { this->supported_modes_ = std::move(modes); }
 
