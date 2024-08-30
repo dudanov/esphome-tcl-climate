@@ -35,7 +35,7 @@ ClimateTraits TclClimate::traits() {
   return traits;
 }
 
-void TclClimate::setup() { this->set_update_interval(5000); }
+void TclClimate::setup() {}
 
 void TclClimate::loop() {
   if (!esphome::uart::UARTDevice::available())

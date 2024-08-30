@@ -58,7 +58,7 @@ async def base_actions_to_code(config, action_id, template_arg, args):
     return var
 
 
-FINAL_VALIDATE_SCHEMA = uart.final_validate_device_schema(
+TCL_FV_SCHEMA = uart.final_validate_device_schema(
     name=DOMAIN,
     baud_rate=9600,
     require_rx=True,

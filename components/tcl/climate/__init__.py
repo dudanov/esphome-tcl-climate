@@ -23,7 +23,7 @@ from esphome.const import (
     CONF_VISUAL,
 )
 
-from .. import CONF_FORCE, CONF_TCL_ID, TCL_BASE_SCHEMA, TclBase, tcl_ns
+from .. import CONF_FORCE, CONF_TCL_ID, TCL_BASE_SCHEMA, TCL_FV_SCHEMA, TclBase, tcl_ns
 
 AUTO_LOAD = ["tcl", "climate"]
 CODEOWNERS = ["@I-am-nightingale", "@xaxexa", "@junkfix"]
@@ -224,6 +224,8 @@ CONFIG_SCHEMA = cv.All(
     ),
     validate_visual,
 )
+
+FINAL_VALIDATE_SCHEMA = TCL_FV_SCHEMA
 
 VerticalAirflowAction = tcl_ns.class_("VerticalAirflowAction", automation.Action)
 HorizontalAirflowAction = tcl_ns.class_("HorizontalAirflowAction", automation.Action)
