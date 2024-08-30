@@ -10,7 +10,7 @@
 namespace esphome {
 namespace tcl {
 
-const char *const TAG = "tcl";
+const char *const TAG = "TCL";
 
 #ifdef USE_SWITCH
 #define SET_STATE_FUN(name) \
