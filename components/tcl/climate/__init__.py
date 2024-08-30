@@ -237,12 +237,6 @@ FINAL_VALIDATE_SCHEMA = uart.final_validate_device_schema(
     stop_bits=1,
 )
 
-ForceOnAction = tcl_ns.class_("ForceOnAction", automation.Action)
-ForceOffAction = tcl_ns.class_("ForceOffAction", automation.Action)
-BeeperOnAction = tcl_ns.class_("BeeperOnAction", automation.Action)
-BeeperOffAction = tcl_ns.class_("BeeperOffAction", automation.Action)
-DisplayOnAction = tcl_ns.class_("DisplayOnAction", automation.Action)
-DisplayOffAction = tcl_ns.class_("DisplayOffAction", automation.Action)
 VerticalAirflowAction = tcl_ns.class_("VerticalAirflowAction", automation.Action)
 HorizontalAirflowAction = tcl_ns.class_("HorizontalAirflowAction", automation.Action)
 VerticalSwingDirectionAction = tcl_ns.class_(
@@ -250,13 +244,6 @@ VerticalSwingDirectionAction = tcl_ns.class_(
 )
 HorizontalSwingDirectionAction = tcl_ns.class_(
     "HorizontalSwingDirectionAction", automation.Action
-)
-
-TCL_ACTION_BASE_SCHEMA = automation.maybe_conf(
-    CONF_TCL_ID,
-    {
-        cv.GenerateID(CONF_TCL_ID): cv.use_id(TclClimate),
-    },
 )
 
 
@@ -268,21 +255,6 @@ def tcl_templated_schema(conf, validator):
             cv.Required(conf): cv.templatable(validator),
         },
     )
-
-
-# Регистрация событий включения и отключения пищалки кондиционера
-@automation.register_action("tcl.beeper_on", BeeperOnAction, TCL_ACTION_BASE_SCHEMA)
-@automation.register_action("tcl.beeper_off", BeeperOffAction, TCL_ACTION_BASE_SCHEMA)
-# Регистрация событий включения и отключения дисплея кондиционера
-@automation.register_action("tcl.display_on", DisplayOnAction, TCL_ACTION_BASE_SCHEMA)
-@automation.register_action("tcl.display_off", DisplayOffAction, TCL_ACTION_BASE_SCHEMA)
-# Регистрация событий включения и отключения принудительного применения настроек
-@automation.register_action("tcl.force_on", ForceOnAction, TCL_ACTION_BASE_SCHEMA)
-@automation.register_action("tcl.force_off", ForceOffAction, TCL_ACTION_BASE_SCHEMA)
-async def base_actions_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_TCL_ID])
-    return var
 
 
 # Регистрация события установки вертикальной фиксации заслонки
