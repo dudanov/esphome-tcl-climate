@@ -12,6 +12,7 @@ namespace tcl {
 
 const char *const TAG = "tcl";
 
+#ifdef USE_SWITCH
 #define SET_STATE_FUN(name) \
   void TclBase::set_##name##_state(bool state) { \
     this->name##_state_ = state; \
@@ -19,6 +20,13 @@ const char *const TAG = "tcl";
     if (this->name##_switch_ != nullptr) \
       this->name##_switch_->publish_state(state); \
   }
+#else
+#define SET_STATE_FUN(name) \
+  void TclBase::set_##name##_state(bool state) { \
+    this->name##_state_ = state; \
+    this->takeControl(); \
+  }
+#endif
 
 void TclBase::takeControl() {
   if (this->force_state_ && this->allow_take_control_)
