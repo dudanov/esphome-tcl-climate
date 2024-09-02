@@ -257,6 +257,8 @@ def templatize(value):
 
 def register_action(name, type_, schema):
     validator = templatize(schema).extend(tcl_parented_schema(TclClimate))
+    if len(schema) == 1:
+        validator = automation.maybe_conf(next(iter(schema.schema)), validator)
     registerer = automation.register_action(f"tcl_climate.{name}", type_, validator)
 
     def decorator(func):
