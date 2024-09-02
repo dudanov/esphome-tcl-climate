@@ -1,3 +1,4 @@
+from esphome.core import coroutine
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
@@ -23,7 +24,15 @@ from esphome.const import (
     CONF_VISUAL,
 )
 
-from .. import CONF_FORCE, CONF_TCL_ID, TCL_BASE_SCHEMA, TCL_FV_SCHEMA, TclBase, tcl_ns
+from .. import (
+    CONF_FORCE,
+    CONF_TCL_ID,
+    TCL_BASE_SCHEMA,
+    TCL_FV_SCHEMA,
+    TclBase,
+    tcl_ns,
+    tcl_parented_schema,
+)
 
 AUTO_LOAD = ["tcl", "climate"]
 CODEOWNERS = ["@I-am-nightingale", "@xaxexa", "@junkfix"]
@@ -237,105 +246,101 @@ HorizontalSwingDirectionAction = tcl_ns.class_(
 )
 
 
-def tcl_templated_schema(conf, validator):
-    return automation.maybe_conf(
-        conf,
-        {
-            cv.GenerateID(CONF_TCL_ID): cv.use_id(TclClimate),
-            cv.Required(conf): cv.templatable(validator),
-        },
-    )
+def templatize(value):
+    if isinstance(value, cv.Schema):
+        value = value.schema
+    ret = {}
+    for key, val in value.items():
+        ret[key] = cv.templatable(val)
+    return cv.Schema(ret)
+
+
+def register_action(name, type_, schema):
+    validator = templatize(schema).extend(tcl_parented_schema(TclClimate))
+    registerer = automation.register_action(f"tcl_climate.{name}", type_, validator)
+
+    def decorator(func):
+        async def new_func(config, action_id, template_arg, args):
+            var = cg.new_Pvariable(action_id, template_arg)
+            await cg.register_parented(var, config[CONF_TCL_ID])
+            await coroutine(func)(var, config, args)
+            return var
+
+        return registerer(new_func)
+
+    return decorator
 
 
 # Регистрация события установки вертикальной фиксации заслонки
-@automation.register_action(
-    "tcl.set_vertical_airflow",
+@register_action(
+    "set_vertical_airflow",
     VerticalAirflowAction,
-    tcl_templated_schema(
-        CONF_VERTICAL_AIRFLOW, cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS)
-    ),
+    {
+        cv.Required(CONF_VERTICAL_AIRFLOW): cv.enum(
+            AIRFLOW_VERTICAL_DIRECTION_OPTIONS,
+            upper=True,
+        )
+    },
 )
-async def tclac_set_vertical_airflow_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_TCL_ID])
+async def tclac_set_vertical_airflow_to_code(var, config, args):
     template_ = await cg.templatable(
         config[CONF_VERTICAL_AIRFLOW], args, AirflowVerticalDirection
     )
     cg.add(var.set_direction(template_))
-    return var
 
 
 # Регистрация события установки горизонтальной фиксации заслонок
-@automation.register_action(
-    "tcl.set_horizontal_airflow",
+@register_action(
+    "set_horizontal_airflow",
     HorizontalAirflowAction,
-    cv.Schema(
-        {
-            cv.GenerateID(): cv.use_id(TclClimate),
-            cv.Required(CONF_HORIZONTAL_AIRFLOW): cv.templatable(
-                cv.enum(AIRFLOW_HORIZONTAL_DIRECTION_OPTIONS, upper=True)
-            ),
-        }
-    ),
+    {
+        cv.Required(CONF_HORIZONTAL_AIRFLOW): cv.enum(
+            AIRFLOW_HORIZONTAL_DIRECTION_OPTIONS,
+            upper=True,
+        )
+    },
 )
-async def tclac_set_horizontal_airflow_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
+async def tclac_set_horizontal_airflow_to_code(var, config, args):
     template_ = await cg.templatable(
         config[CONF_HORIZONTAL_AIRFLOW], args, AirflowHorizontalDirection
     )
     cg.add(var.set_direction(template_))
-    return var
 
 
 # Регистрация события установки вертикального качания шторки
-@automation.register_action(
-    "tcl.set_vertical_swing_direction",
+@register_action(
+    "set_vertical_swing_direction",
     VerticalSwingDirectionAction,
-    cv.Schema(
-        {
-            cv.GenerateID(): cv.use_id(TclClimate),
-            cv.Required(CONF_VERTICAL_SWING_MODE): cv.templatable(
-                cv.enum(VERTICAL_SWING_DIRECTION_OPTIONS, upper=True)
-            ),
-        }
-    ),
+    {
+        cv.Required(CONF_VERTICAL_SWING_MODE): cv.enum(
+            VERTICAL_SWING_DIRECTION_OPTIONS,
+            upper=True,
+        ),
+    },
 )
-async def tclac_set_vertical_swing_direction_to_code(
-    config, action_id, template_arg, args
-):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
+async def tclac_set_vertical_swing_direction_to_code(var, config, args):
     template_ = await cg.templatable(
         config[CONF_VERTICAL_SWING_MODE], args, VerticalSwingDirection
     )
     cg.add(var.set_swing_direction(template_))
-    return var
 
 
 # Регистрация события установки горизонтального качания шторок
-@automation.register_action(
-    "tcl.set_horizontal_swing_direction",
+@register_action(
+    "set_horizontal_swing_direction",
     HorizontalSwingDirectionAction,
-    cv.Schema(
-        {
-            cv.GenerateID(): cv.use_id(TclClimate),
-            cv.Required(CONF_HORIZONTAL_SWING_MODE): cv.templatable(
-                cv.enum(HORIZONTAL_SWING_DIRECTION_OPTIONS, upper=True)
-            ),
-        }
-    ),
+    {
+        cv.Required(CONF_HORIZONTAL_SWING_MODE): cv.enum(
+            HORIZONTAL_SWING_DIRECTION_OPTIONS,
+            upper=True,
+        ),
+    },
 )
-async def tclac_set_horizontal_swing_direction_to_code(
-    config, action_id, template_arg, args
-):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
+async def tclac_set_horizontal_swing_direction_to_code(var, config, args):
     template_ = await cg.templatable(
         config[CONF_HORIZONTAL_SWING_MODE], args, HorizontalSwingDirection
     )
     cg.add(var.set_swing_direction(template_))
-    return var
 
 
 # Добавление конфигурации в код

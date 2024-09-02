@@ -32,26 +32,23 @@ BeeperOffAction = tcl_ns.class_("BeeperOffAction", automation.Action)
 DisplayOnAction = tcl_ns.class_("DisplayOnAction", automation.Action)
 DisplayOffAction = tcl_ns.class_("DisplayOffAction", automation.Action)
 
-TCL_ACTION_BASE_SCHEMA = automation.maybe_conf(
-    CONF_TCL_ID,
-    {
-        cv.GenerateID(CONF_TCL_ID): cv.use_id(TclBase),
-    },
-)
+TCL_SIMPLE_ACTION_SCHEMA = automation.maybe_conf(CONF_TCL_ID, tcl_parented_schema())
 
 
 TCL_BASE_SCHEMA = uart.UART_DEVICE_SCHEMA.extend(cv.polling_component_schema("5s"))
 
 
 # Регистрация событий включения и отключения пищалки кондиционера
-@automation.register_action("tcl.beeper_on", BeeperOnAction, TCL_ACTION_BASE_SCHEMA)
-@automation.register_action("tcl.beeper_off", BeeperOffAction, TCL_ACTION_BASE_SCHEMA)
+@automation.register_action("tcl.beeper_on", BeeperOnAction, TCL_SIMPLE_ACTION_SCHEMA)
+@automation.register_action("tcl.beeper_off", BeeperOffAction, TCL_SIMPLE_ACTION_SCHEMA)
 # Регистрация событий включения и отключения дисплея кондиционера
-@automation.register_action("tcl.display_on", DisplayOnAction, TCL_ACTION_BASE_SCHEMA)
-@automation.register_action("tcl.display_off", DisplayOffAction, TCL_ACTION_BASE_SCHEMA)
+@automation.register_action("tcl.display_on", DisplayOnAction, TCL_SIMPLE_ACTION_SCHEMA)
+@automation.register_action(
+    "tcl.display_off", DisplayOffAction, TCL_SIMPLE_ACTION_SCHEMA
+)
 # Регистрация событий включения и отключения принудительного применения настроек
-@automation.register_action("tcl.force_on", ForceOnAction, TCL_ACTION_BASE_SCHEMA)
-@automation.register_action("tcl.force_off", ForceOffAction, TCL_ACTION_BASE_SCHEMA)
+@automation.register_action("tcl.force_on", ForceOnAction, TCL_SIMPLE_ACTION_SCHEMA)
+@automation.register_action("tcl.force_off", ForceOffAction, TCL_SIMPLE_ACTION_SCHEMA)
 async def base_actions_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(var, config[CONF_TCL_ID])
