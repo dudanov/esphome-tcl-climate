@@ -256,7 +256,7 @@ def templatize(value):
 
 
 def register_action(name, type_, schema):
-    validator = templatize(schema).extend(tcl_parented_schema(TclClimate))
+    validator = tcl_parented_schema(TclClimate).extend(templatize(schema))
 
     if len(schema) == 1:
         key = next(iter(schema))
