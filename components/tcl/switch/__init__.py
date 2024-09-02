@@ -27,7 +27,7 @@ _SCHEMAS = {
         switch_schema(
             DisplaySwitch,
             entity_category=ENTITY_CATEGORY_CONFIG,
-            icon="mdi:volume-source",
+            icon="mdi:theme-light-dark",
             default_restore_mode="RESTORE_DEFAULT_ON",
         ),
     ),
@@ -36,7 +36,7 @@ _SCHEMAS = {
         switch_schema(
             ForceSwitch,
             entity_category=ENTITY_CATEGORY_CONFIG,
-            icon="mdi:volume-source",
+            icon="mdi:timer-lock-open-outline",
             default_restore_mode="RESTORE_DEFAULT_ON",
         ),
     ),
