@@ -246,7 +246,7 @@ HorizontalSwingDirectionAction = tcl_ns.class_(
     "HorizontalSwingDirectionAction", automation.Action
 )
 
-
+"""
 def templatize(value):
     if isinstance(value, cv.Schema):
         value = value.schema
@@ -349,6 +349,7 @@ async def tclac_set_horizontal_swing_direction_to_code(var, config, args):
     )
     cg.add(var.set_swing_direction(template_))
 
+"""
 
 # Добавление конфигурации в код
 async def to_code(config):
