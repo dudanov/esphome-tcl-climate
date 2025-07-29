@@ -1,4 +1,3 @@
-from esphome.core import coroutine
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
@@ -23,6 +22,7 @@ from esphome.const import (
     CONF_TEMPERATURE_STEP,
     CONF_VISUAL,
 )
+from esphome.core import coroutine
 
 from .. import (
     CONF_FORCE,
@@ -169,9 +169,9 @@ def validate_visual(config):
 
 # Проверка конфигурации компонента и принятие значений по умолчанию
 CONFIG_SCHEMA = cv.All(
-    climate.CLIMATE_SCHEMA.extend(
+    climate.climate_schema(TclClimate)
+    .extend(
         {
-            cv.GenerateID(): cv.declare_id(TclClimate),
             cv.Optional(CONF_BEEPER): cv.boolean,
             cv.Optional(CONF_DISPLAY): cv.boolean,
             cv.Optional(CONF_FORCE): cv.boolean,
@@ -230,7 +230,8 @@ CONFIG_SCHEMA = cv.All(
                 ],
             ): cv.ensure_list(cv.enum(SUPPORTED_FAN_MODES_OPTIONS, upper=True)),
         }
-    ).extend(TCL_BASE_SCHEMA),
+    )
+    .extend(TCL_BASE_SCHEMA),
     validate_visual,
 )
 
